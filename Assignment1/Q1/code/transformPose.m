@@ -4,4 +4,29 @@ function [result_pose, composed_rot] = transformPose(rotations, pose, kinematic_
     % kinematic chain: A 15 x 2 array of joint ordering
     % root_positoin: the index of the root in pose vector.
     % Your code here 
+    
+    %step one homogeneous coordinates
+    pose=[pose ones(size(pose,1),1)];
+    % make rotation in 4d space
+    rotations_4=zeros(size(rotations,1),4,4);
+    for i=1:size(rotations,1)
+        rotations_4(i,:,:)=[squeeze(rotations(i,:,:)) zeros(3,1);0,0,0,1];
+    end
+    result_pose=dfs(rotations_4,pose,kinematic_chain,root_location,eye(4));
+    result_pose=result_pose(:,1:end-1);
+    composed_rot=0;
+end
+
+function [newpos]=dfs(rotations,pose,kinematic_chain,root_location,matrix_upto_now)
+    newpos=pose;
+    for i=1:size(kinematic_chain,1)
+        parent=kinematic_chain(i,2);
+        matrix_upto_now_2=matrix_upto_now*[eye(3) newpos(parent,1:end-1)';0,0,0,1]*squeeze(rotations(i,:,:))*[eye(3) -newpos(parent,1:end-1)';0,0,0,1];
+        if parent==root_location
+            child=kinematic_chain(i,1);
+            [newpos]=dfs(rotations,newpos,kinematic_chain,child,matrix_upto_now_2);
+        end
+    end
+    
+    newpos(root_location,:)=matrix_upto_now*pose(root_location,:)';
 end
