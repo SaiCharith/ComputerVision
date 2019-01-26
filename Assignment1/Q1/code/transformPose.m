@@ -12,21 +12,21 @@ function [result_pose, composed_rot] = transformPose(rotations, pose, kinematic_
     for i=1:size(rotations,1)
         rotations_4(i,:,:)=[squeeze(rotations(i,:,:)) zeros(3,1);0,0,0,1];
     end
-    result_pose=dfs(rotations_4,pose,kinematic_chain,root_location,eye(4));
+    [result_pose,composed_rot]=dfs(rotations_4,pose,kinematic_chain,root_location,eye(4));
     result_pose=result_pose(:,1:end-1);
-    composed_rot=0;
 end
 
-function [newpos]=dfs(rotations,pose,kinematic_chain,root_location,matrix_upto_now)
+function [newpos,composed_rot]=dfs(rotations,pose,kinematic_chain,root_location,matrix_upto_now)
     newpos=pose;
     for i=1:size(kinematic_chain,1)
         parent=kinematic_chain(i,2);
         matrix_upto_now_2=matrix_upto_now*[eye(3) newpos(parent,1:end-1)';0,0,0,1]*squeeze(rotations(i,:,:))*[eye(3) -newpos(parent,1:end-1)';0,0,0,1];
         if parent==root_location
             child=kinematic_chain(i,1);
-            [newpos]=dfs(rotations,newpos,kinematic_chain,child,matrix_upto_now_2);
+            [newpos,composed_rot]=dfs(rotations,newpos,kinematic_chain,child,matrix_upto_now_2);
         end
     end
     
     newpos(root_location,:)=matrix_upto_now*pose(root_location,:)';
+    composed_rot(parent,:,:)=matrix_upto_now;
 end
