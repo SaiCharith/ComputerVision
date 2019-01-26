@@ -14,7 +14,7 @@ figure
 imshow(imD)
 
 %%
-nSteps = 2; % Fill in the number of steps here
+nSteps = 10; % Fill in the number of steps here
 imU = radUnDist(imD, k1, k2, nSteps);
 figure
 imshow(imU)
