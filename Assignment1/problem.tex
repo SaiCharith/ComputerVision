@@ -80,10 +80,26 @@ So, in geometric coordinates the image of hyperbola represents the parabola $ y 
 \textbf{Problem 4:} \\
 
 
-Translation vector T cannot be obtained as vanishing point of line L passing through B is KR[tL+B-T] as t goes to infinity, which is KRL, independent of T.
+Translation vector T cannot be obtained as vanishing point of line parallel to L and passing through B is KR(tL+B-T) as t goes to infinity, which is KRL and is independent of T.
 
-Let $l_1,l_2,l_3$ be direction vectors, $K_1,R_1,K_2,R_2$ be internals and externals of both the cameras,$P_1,P_2,P_3,Q_1,Q_2,Q_3$ be corresponding vanishing points  in homogenous coordinates. Then we have 
+Let $l_1,l_2,l_3$ be the direction vectors, $K_1, K_2$ be the  internals and $ R_1, R_2$ be the rotation matrices of both the cameras respectively. And Let $ P_1, P_2,P_3,Q_1,Q_2,Q_3$ be corresponding vanishing points in homogenous coordinates. Here, 
 
+\[
+K_1 =
+\begin{bmatrix}
+    f_ps_p & 0 & x_{H_p}  \\
+    0 & f_ps_p & y_{H_p}  \\
+    0 & 0 & 1
+    \end{bmatrix}, \qquad
+K_2 =
+\begin{bmatrix}
+    f_qs_q & 0 & x_{H_q}  \\
+    0 & f_qs_q & y_{H_q}  \\
+    0 & 0 & 1
+    \end{bmatrix}
+\]
+
+Therefore, 
 \begin{equation*}
 \begin{split}
 & K_1R_1l_1 = \lambda_1 P_1 \implies l_1 = \lambda_1R_1^{-1}K_1^{-1}P_1 \qquad (1)\\
@@ -91,25 +107,27 @@ Let $l_1,l_2,l_3$ be direction vectors, $K_1,R_1,K_2,R_2$ be internals and exter
 & K_1R_1l_3 = \lambda_3P_3 \implies l_3 = \lambda_3R_1^{-1}K_1^{-1}P_3 \qquad (3)\\
 \end{split}
 \end{equation*}
-Using $l_1^Tl_2^{}=0$ we have
 
+\newpage
+Using $l_1^Tl_2^{}=0$ we have,
 \begin{equation*}
 \begin{split}
 & (\lambda_1R_1^{-1}K_1^{-1}P_1)^T(\lambda_2R_1^{-1}K_1^{-1}P_2) = 0 \qquad \\
 \implies & P_1^{T}K_1^{-T}R_1^{-T}R_1^{-1}K_1^{-1}P_2 = 0\\
-\implies & P_1^{T}K_1^{-T}K_1^{-1}P_2 = 0 \quad (R_1\;is \;orthogonal) \\
-Similarly \quad &  P_2^{T}K_1^{-T}K_1^{-1}P_3 = 0 \quad (using\;\; l_2^Tl_3^{}=0)\\
+\implies & P_1^{T}K_1^{-T}K_1^{-1}P_2 = 0 \quad (R_1\;is \;orthonormal) \\
+Similarly, \quad &  P_2^{T}K_1^{-T}K_1^{-1}P_3 = 0 \quad (using\;\; l_2^Tl_3^{}=0)\\
+Similarly, \quad &  P_3^{T}K_1^{-T}K_1^{-1}P_1 = 0 \quad (using\;\; l_3^Tl_1^{}=0)\\
 \end{split}
 \end{equation*}
 
-Assuming $x_H,y_H$ of both the cameras are known, the only unknowns are $f_p,s_p$ in $K_1$ which can be obtained using the last two equations. Similarly internals of Q can be obtained.
+The only unknowns are $f_p\times s_p,x_{H_p},y_{H_p}$ in $K_1$ which can be obtained using the last three equations. But we cannot separate $f_p$ and $s_p$. Similarly internals of Q other than resolution and focal length can be obtained. 
 
 From second camera we have 
 \begin{equation*}
 \begin{split}
-& K_2R_2l_1 = \lambda_1 Q_1 \implies l_1 = \gamma_1^{}R_2^{-1}K_2^{-1}Q_1 \qquad (4)\\
-& K_2R_2l_2 = \lambda_1 Q_2 \implies l_2 = \gamma_1^{}R_2^{-1}K_2^{-1}Q_2 \qquad (5)\\
-& K_2R_2l_3 = \lambda_1 Q_3 \implies l_3 = \gamma_1^{}R_2^{-1}K_2^{-1}Q_3 \qquad (6)\\
+& K_2R_2l_1 = \gamma_1 Q_1 \implies l_1 = \gamma_1^{}R_2^{-1}K_2^{-1}Q_1 \qquad (4)\\
+& K_2R_2l_2 = \gamma_2 Q_2 \implies l_2 = \gamma_2^{}R_2^{-1}K_2^{-1}Q_2 \qquad (5)\\
+& K_2R_2l_3 = \gamma_3 Q_3 \implies l_3 = \gamma_3^{}R_2^{-1}K_2^{-1}Q_3 \qquad (6)\\
 \end{split}
 \end{equation*}
 
@@ -123,7 +141,7 @@ Using equations \{1,4\},\{2,5\},\{3,6\}
 \end{split}
 \end{equation*}
 
-Now we have 6 unkowns (3 $\delta 's$ and 3 in R) and 6 equations, we can solve them.
+Now we have 6 unknowns (3 $\delta 's$ and 3 in R) and 6 equations, we can solve them.
 
 \hrulefill\\ \\
 
