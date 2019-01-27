@@ -44,7 +44,6 @@ B =
     0 & 1 & 0  \\
     1 & 0 & 0
     \end{bmatrix}
- *
     \begin{bmatrix}
     t \\
     1/t \\
@@ -75,14 +74,14 @@ B =
 \\
 In geometric coordinates, B = $ (1/t, 1/t^2)$ , $ where $ $ t \neq 0 $ . \\
 So, in geometric coordinates the image of hyperbola represents the parabola $ y = x^2. $  
-\\ \\
+
+\hrulefill\\ \\
 \textbf{Problem 5a:} \\
 Let R represent rotation, translation matrix and K represent camera internals and A be the direction of parallel linse passing through B and C. Any points on these lines can be represented as $P=tA+B$ , $Q=sA+C$ respectievely. So these points correspond to KRP and KRQ respectievely. Since R just rotates or transforms the lines still remain parallel. So RP and RQ correspond to $P' = t'A'+B'$ and $Q'=s'A'+C'$. Now as t' and s' tends to infinity, in the image they correspond to their respective vanishing points.\\
 Therefore, 
 
 \begin{equation*}
 \begin{split}
-&\implies |x_i- \mu| \leq \sqrt{\sum_{j=1}^{n} (x_j-\mu)^2 } \quad for\; any\; i\\
 & \;\;\;\qquad KP' = K(t'A'+B')\\
 &\implies KP' = K(A'+\frac{B'}{t'}) \qquad (Homogenous\;\; Coordinates)\\ 
 &\implies KP' = KA' \qquad (as \;\;t'\rightarrow\varpropto)\\
@@ -119,6 +118,7 @@ Q=
 \implies & det(KQ^T)=0\\
 \implies & det(K[L\; M\; N]) =0 \\
 \implies & det([KL\;\; KM\;\; KN]) = 0\\
+\implies & det([KL/a\;\; KM/b\;\; KN/c]) = 0 \qquad (Normalizing\;\; third \;\;coordinate)\\
 \end{split}
 \end{equation*}
 $\implies$ area of triangle formed by KL, KM, KN (vanishing points) is zero. So the vanishing points of the three sets of coplaner parellel lines are collinear. 
