@@ -75,7 +75,60 @@ B =
 In geometric coordinates, B = $ (1/t, 1/t^2)$ , $ where $ $ t \neq 0 $ . \\
 So, in geometric coordinates the image of hyperbola represents the parabola $ y = x^2. $  
 
+\hrulefill\\
+
+\textbf{Problem 4:} \\
+
+
+Translation vector T cannot be obtained as vanishing point of line L passing through B is KR[tL+B-T] as t goes to infinity, which is KRL, independent of T.
+
+Let $l_1,l_2,l_3$ be direction vectors, $K_1,R_1,K_2,R_2$ be internals and externals of both the cameras,$P_1,P_2,P_3,Q_1,Q_2,Q_3$ be corresponding vanishing points  in homogenous coordinates. Then we have 
+
+\begin{equation*}
+\begin{split}
+& K_1R_1l_1 = \lambda_1 P_1 \implies l_1 = \lambda_1R_1^{-1}K_1^{-1}P_1 \qquad (1)\\
+& K_1R_1l_2 = \lambda_2P_2 \implies l_2 = \lambda_2R_1^{-1}K_1^{-1}P_2 \qquad (2)\\
+& K_1R_1l_3 = \lambda_3P_3 \implies l_3 = \lambda_3R_1^{-1}K_1^{-1}P_3 \qquad (3)\\
+\end{split}
+\end{equation*}
+Using $l_1^Tl_2^{}=0$ we have
+
+\begin{equation*}
+\begin{split}
+& (\lambda_1R_1^{-1}K_1^{-1}P_1)^T(\lambda_2R_1^{-1}K_1^{-1}P_2) = 0 \qquad \\
+\implies & P_1^{T}K_1^{-T}R_1^{-T}R_1^{-1}K_1^{-1}P_2 = 0\\
+\implies & P_1^{T}K_1^{-T}K_1^{-1}P_2 = 0 \quad (R_1\;is \;orthogonal) \\
+Similarly \quad &  P_2^{T}K_1^{-T}K_1^{-1}P_3 = 0 \quad (using\;\; l_2^Tl_3^{}=0)\\
+\end{split}
+\end{equation*}
+
+Assuming $x_H,y_H$ of both the cameras are known, the only unknowns are $f_p,s_p$ in $K_1$ which can be obtained using the last two equations. Similarly internals of Q can be obtained.
+
+From second camera we have 
+\begin{equation*}
+\begin{split}
+& K_2R_2l_1 = \lambda_1 Q_1 \implies l_1 = \gamma_1^{}R_2^{-1}K_2^{-1}Q_1 \qquad (4)\\
+& K_2R_2l_2 = \lambda_1 Q_2 \implies l_2 = \gamma_1^{}R_2^{-1}K_2^{-1}Q_2 \qquad (5)\\
+& K_2R_2l_3 = \lambda_1 Q_3 \implies l_3 = \gamma_1^{}R_2^{-1}K_2^{-1}Q_3 \qquad (6)\\
+\end{split}
+\end{equation*}
+
+Using equations \{1,4\},\{2,5\},\{3,6\}  
+
+\begin{equation*}
+\begin{split}
+&\lambda_1^{}R_1^{-1}K_1^{-1}P_1 = \gamma_1^{}R_2^{-1}K_2^{-1}Q_1 \implies P_1 = \delta_1K_1RK_2^{-1}Q_1\\
+&\lambda_2^{}R_1^{-1}K_1^{-1}P_2 = \gamma_2^{}R_2^{-1}K_2^{-1}Q_2 \implies P_2 = \delta_2K_1RK_2^{-1}Q_2\\
+&\lambda_1^{}R_1^{-1}K_1^{-1}P_3 = \gamma_3^{}R_2^{-1}K_2^{-1}Q_3 \implies P_3 = \delta_3K_1RK_2^{-1}Q_3\\
+\end{split}
+\end{equation*}
+
+Now we have 6 unkowns (3 $\delta 's$ and 3 in R) and 6 equations, we can solve them.
+
 \hrulefill\\ \\
+
+
+
 \textbf{Problem 5a:} \\
 Let R represent rotation, translation matrix and K represent camera internals and A be the direction of parallel linse passing through B and C. Any points on these lines can be represented as $P=tA+B$ , $Q=sA+C$ respectievely. So these points correspond to KRP and KRQ respectievely. Since R just rotates or transforms the lines still remain parallel. So RP and RQ correspond to $P' = t'A'+B'$ and $Q'=s'A'+C'$. Now as t' and s' tends to infinity, in the image they correspond to their respective vanishing points.\\
 Therefore, 
