@@ -15,7 +15,7 @@ x2 = [x2 ones(N,1)];
 
 % Doing Homography S number of times where S is the expected number of 
 % subsets for getting all inliers in atleast one subset
-for i = 1:3*S    
+for i = 1:S    
     % k random indices from 1-N without repitition
     indices = datasample([1:N], k, 'Replace', false);
     
@@ -30,16 +30,13 @@ for i = 1:3*S
     % C while calculating consesus set
     calculatedX2 = x1*tempH';
     calculatedX2 = calculatedX2./calculatedX2(:,3);
+    differe
     ConsensusCount = sum(sum((x2 - calculatedX2).^2, 2) < thresh);
     if (ConsensusCount >= maxConsensusCount)
         maxConsensusCount = ConsensusCount;
         H = tempH;
     end
 end
-calculatedX2 = x1*H';
-calculatedX2 = calculatedX2./calculatedX2(:,3);
-ConsensusSet = sum((x2 - calculatedX2).^2, 2) < thresh;
-p1 = x1(ConsensusSet, :);
-p2 = x2(ConsensusSet, :);
-H = homography(p1, p2);
+
 end
+

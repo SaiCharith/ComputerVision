@@ -16,19 +16,16 @@ points2 = detectSURFFeatures(I2);
 indexPairs = matchFeatures(f1,f2);
 matchedPoints1 = vpts1(indexPairs(:,1)).Location;
 matchedPoints2 = vpts2(indexPairs(:,2)).Location;
-% figure; showMatchedFeatures(I1,I2,matchedPoints1,matchedPoints2);
 
 % Ransac Homography such that matchedPoints2 = H * matchedPoints1
 H = ransacHomography(matchedPoints1, matchedPoints2, threshold);
-
-
 
 % Initializing stitched Image with a super Image containing original I1 at
 % its centre
 height = max(size(I1, 1), size(I2, 1));
 width = max(size(I1, 2), size(I2, 2));
-superImage = uint8(zeros(3*height, 3*width, 3));
-superImage(height+1:2*height, width+1:2*width, :) = origI2(:, :, :);
+superImage = zeros(3*height, 3*width, 3);
+superImage(height+1:2*height, width+1:2*width, :) = origI1;
 
 % Reverse Warping
 for i=1:3*height
@@ -40,14 +37,14 @@ for i=1:3*height
             y = floor(coord(2));
             if ((x <= size(I2, 1)) && (x >= 1) && (y <= size(I2, 2)) && (y >= 1))
                 % Valid Point in I2 exists
-                superImage(i,j,:) = origI1(x,y,:);
+                superImage(i,j,:) = origI2(x,y,:);
             else
                 % No Valid Point in I2 exist
-                superImage(i,j,:) = [0 0 0];
+                superImage(i,j,:) = []
             end
         end
     end
 end
-imshow(superImage);
+        
 %%
 toc;
