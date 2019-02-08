@@ -15,7 +15,7 @@ x2 = [x2 ones(N,1)];
 
 % Doing Homography S number of times where S is the expected number of 
 % subsets for getting all inliers in atleast one subset
-for i = 1:3*S    
+for i = 1:10*S    
     % k random indices from 1-N without repitition
     indices = datasample([1:N], k, 'Replace', false);
     
