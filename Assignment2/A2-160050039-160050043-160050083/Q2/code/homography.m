@@ -2,6 +2,7 @@ function [ H ] = homography( p1, p2 )
 %HOMOGRAPHY Summary of this function goes here
 % World Coordinate = X = p1
 % Image Coordinate = x = p2
+% p2 = H*p1
 %   Detailed explanation goes here
 
     M = zeros(8, 9);

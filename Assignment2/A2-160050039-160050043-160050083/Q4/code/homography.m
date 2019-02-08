@@ -1,5 +1,5 @@
 function [ H ] = homography( p1, p2 )
-%% p2 = H*p1 wher p1 & p2 are correspondences and are in homogeneous coordinates
+%% p2 = H*p1 where p1 & p2 are correspondences and are in homogeneous coordinates
 
 M = zeros(2*size(p1, 1), 9);
 % Calculating matrix M

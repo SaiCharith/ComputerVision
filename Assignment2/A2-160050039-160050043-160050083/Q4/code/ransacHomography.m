@@ -30,6 +30,7 @@ for i = 1:10*S
     % C while calculating consesus set
     calculatedX2 = x1*tempH';
     calculatedX2 = calculatedX2./calculatedX2(:,3);
+    
     ConsensusCount = sum(sum((x2 - calculatedX2).^2, 2) < thresh);
     if (ConsensusCount >= maxConsensusCount)
         maxConsensusCount = ConsensusCount;
