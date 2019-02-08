@@ -19,6 +19,53 @@
 %\noindent\rule{12cm}{0.4pt}
 \hrulefill
 
+\textbf{\newline Problem 1:}
+
+The Observed values of average MSE for \\
+q1 is 0.3344 \\q2 is  0.1795 \\
+q3 is 0.6752 \\
+
+which are considerably small compared to the actual value of the x and y coordinates (between 100 and 1000)
+
+The visualization of the points and images can be found in input folder and can be visualized using the \textbf{visualize\_image.m} script which calls impixel info.
+
+Note the images were taken from SL3 where we found the walls with perpendicular surfaces stuck with checkerboard pattern
+
+
+ The reason for normalizing is not clear from the above example as the coordinates are well behaved. If i run it without normalizing
+and also commenting line 88 then also we get almost the same MSE.
+
+
+ It is a good Idea to Normalize because Then we work with the \textbf{same order
+ of magnitude} of the points. this not only helps in \textbf{controlling precision
+ errors} but also keeps the numbers small enough to be well \textbf{in range} for
+ our computation.
+
+ So normalization is essential not only for numerical stability, 
+ but also for more accurate estimation in presence of noise and faster 
+ solution (in case of iterative solver).
+
+ The precise answer as we got from \\
+ https://dsp.stackexchange.com/questions/10887/why-normalize-the-data-set-before-applying-direct-linear-transform?fbclid=IwAR0gwxXtF9ire5mFa13hjVlCnn7wPyD3-FFtTSMZWdc3uT6pGFOAvpSSH5s
+ \\
+ is that We decrease the condition number of the Matrix M which is the
+ 12*12 matrix we use in the computation according to the code.
+ 
+ 
+ \vspace{10pt}
+ In more Detail:-\vspace{10pt}
+ \\
+ The source and target coordinate data are usually noisy. Without normalization, the data from source would can have two orders of magnitude larger variance than from target (or vice versa).
+ 
+ The homography estimation usually finds parameters in a least-squares sense - hence the best statistical estimate is found only if variances of the parameters are the same (or known beforehand, but it is more practical just to normalize the input).
+ 
+ Direct solvers do not like poorly scaled problems because numerical instabilities appear (e.g. dividing very large number by a very small number easily leads to numerical overflow).
+ 
+ Iterative solvers struggle with badly conditioned matrices by needing more iterations.
+
+
+\hrulefill \\
+
 
 
 
