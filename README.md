@@ -1,2 +1,2 @@
 # ComputerVision
-Assignments & Projects related to CS 763 at IIT Bombay
+Assignments & Project related to CS 763 at IIT Bombay
