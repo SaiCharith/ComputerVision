@@ -15,8 +15,8 @@ def loadData():
 	TRAINING_LABELS = "Train/labels.bin"
 	TESTING_DATA = "Test/test.bin"
 
-	Data = torch.tensor(torchfile.load(TRAINING_DATA), dtype=dtype)
-	Labels = torch.tensor(torchfile.load(TRAINING_LABELS), dtype=torch.long)
+	Data = torch.tensor(torchfile.load(TRAINING_DATA), dtype=dtype, device=device)
+	Labels = torch.tensor(torchfile.load(TRAINING_LABELS), dtype=torch.long, device=device)
 
 	SIZE = Data.size()[0]
 	HEIGHT = Data.size()[1]
@@ -39,22 +39,18 @@ def createModel():
 	trainingData, trainingLabels, validationData, validationLabels = loadData()
 
 	neuralNetwork = Model.Model()
-	neuralNetwork.addLayer(Linear.Linear(108*108,108))
+	neuralNetwork.addLayer(Linear.Linear(108*108, 100))
 	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(108,54))
-	neuralNetwork.addLayer(ReLU.ReLU()) 
-	neuralNetwork.addLayer(Linear.Linear(54,27))
+	neuralNetwork.addLayer(Linear.Linear(100, 6))
 	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(27,6))
-	neuralNetwork.addLayer(ReLU.ReLU())
-
-	learningRate = 0.001
+	learningRate = 0.0001
 	batchSize = 20
 	epochs = 30
 
 	neuralNetwork.trainModel(learningRate, batchSize, epochs, trainingData, trainingLabels)
 
 	predictions = neuralNetwork.classify(validationData)
-	print("Validation Accuracy: ", (torch.sum(predictions == validationLabels)*100.0/validationLabels.size()[0]))
+	print(torch.sum(predictions == validationLabels).item())
+	print("Validation Accuracy: ", (torch.sum(predictions == validationLabels).item()*100.0/validationLabels.size()[0]))
 
 createModel()

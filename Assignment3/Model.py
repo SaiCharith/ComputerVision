@@ -58,7 +58,8 @@ class Model:
 				# self.dispGradParam()
 				# pause()
 			predictions = self.classify(trainingData)
-			print("Training Accuracy: ", (torch.sum(predictions == trainingLabels)*100.0/trainingLabels.size()[0]))
+			print(torch.sum(predictions == trainingLabels).item())
+			print("Training Accuracy: ", (torch.sum(predictions == trainingLabels).item()*100.0/trainingLabels.size()[0]))
 
 	def classify(self, data):
 		guesses = self.forward(data)
