@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-dtype = (torch.cuda.doubleTensor if torch.cuda.is_available() else torch.double)
+dtype = torch.double
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
@@ -20,12 +20,14 @@ class Linear:
 		# print(self.W)
 		# print(self.B)
 		self.output = input.mm(self.W.transpose(0,1)).add(self.B.transpose(0,1))
+		# print("Linear Layer Forward")
 		# print(self.output)
 
 	def backward(self, input, gradOutput):
 		self.gradInput = gradOutput.mm(self.W)
 		self.gradB = gradOutput.sum(dim = 0).reshape(self.out_neurons,1)
 		self.gradW = gradOutput.transpose(0,1).mm(input)
+		# print("Linear Layer Backward")
 		return self.gradInput
 
 	def clearGradParam(self):
@@ -34,10 +36,6 @@ class Linear:
 
 	def dispGradParam(self):
 		print("Linear Layer")
-		# print("Weights")
-		print(self.W)
-		# print("Biases")
-		print(self.B)
 
 	def updateParam(self, learningRate):
 		self.W -= learningRate*self.gradW

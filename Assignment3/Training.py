@@ -16,6 +16,7 @@ def loadData():
 	TESTING_DATA = "Test/test.bin"
 
 	Data = torch.tensor(torchfile.load(TRAINING_DATA), dtype=dtype, device=device)
+	Data = Data/256.0
 	Labels = torch.tensor(torchfile.load(TRAINING_LABELS), dtype=torch.long, device=device)
 
 	SIZE = Data.size()[0]
@@ -42,10 +43,9 @@ def createModel():
 	neuralNetwork.addLayer(Linear.Linear(108*108, 100))
 	neuralNetwork.addLayer(ReLU.ReLU())
 	neuralNetwork.addLayer(Linear.Linear(100, 6))
-	neuralNetwork.addLayer(ReLU.ReLU())
-	learningRate = 0.0001
-	batchSize = 20
-	epochs = 30
+	learningRate = 0.01
+	batchSize = 30
+	epochs = 50
 
 	neuralNetwork.trainModel(learningRate, batchSize, epochs, trainingData, trainingLabels)
 

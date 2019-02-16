@@ -19,19 +19,12 @@ class Criterion:
 		inputExp = input.exp()
 		self.probabilities = inputExp/inputExp.sum(dim=1).unsqueeze(1)
 		loss = -self.probabilities.log()
-		return torch.sum(loss*torch.eye(num_classes, dtype=dtype)[target])/batch_size
+		return torch.sum(loss*torch.eye(num_classes, dtype=dtype, device=device)[target])/batch_size
 
 	def backward(self, input, target):
 		batch_size, num_classes = input.size()
-		# print(input)
 		inputExp = input.exp()
-		# print("EXP")
-		# print(inputExp)
-		# pause()
 		probabilities = inputExp/(inputExp.sum(dim=1).unsqueeze(1))
 		probabilities[torch.isnan(probabilities)] = 1
-		grads = (probabilities - torch.eye(num_classes, dtype=dtype)[target])/batch_size
-		# print("Criterion")
-		# print(grads)
-		# pause()
+		grads = (probabilities - torch.eye(num_classes, dtype=dtype, device=device)[target])/batch_size
 		return grads
