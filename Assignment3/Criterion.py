@@ -23,14 +23,15 @@ class Criterion:
 
 	def backward(self, input, target):
 		batch_size, num_classes = input.size()
-		print(input)
+		# print(input)
 		inputExp = input.exp()
-		print("EXP")
-		print(inputExp)
-		pause()
+		# print("EXP")
+		# print(inputExp)
+		# pause()
 		probabilities = inputExp/(inputExp.sum(dim=1).unsqueeze(1))
+		probabilities[torch.isnan(probabilities)] = 1
 		grads = (probabilities - torch.eye(num_classes, dtype=dtype)[target])/batch_size
-		print("Criterion")
-		print(grads)
-		pause()
+		# print("Criterion")
+		# print(grads)
+		# pause()
 		return grads

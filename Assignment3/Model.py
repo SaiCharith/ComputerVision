@@ -55,8 +55,8 @@ class Model:
 				gradOutput = criterion.backward(activations, trainingLabels[batchSize*j:(j+1)*batchSize])
 				self.backward(trainingData[batchSize*j:(j+1)*batchSize], gradOutput)
 				self.updateParam(learningRate)
-				self.dispGradParam()
-				pause()
+				# self.dispGradParam()
+				# pause()
 			predictions = self.classify(trainingData)
 			print("Training Accuracy: ", (torch.sum(predictions == trainingLabels)*100.0/trainingLabels.size()[0]))
 

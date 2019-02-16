@@ -16,7 +16,10 @@ class Linear:
 		self.gradInput = None # batch_size X in_neurons
 	
 	def forward(self, input):
+		# print(self.W)
+		# print(self.B)
 		self.output = input.mm(self.W.transpose(0,1)).add(self.B.transpose(0,1))
+		# print(self.output)
 
 	def backward(self, input, gradOutput):
 		self.gradInput = gradOutput.mm(self.W)
@@ -30,9 +33,9 @@ class Linear:
 
 	def dispGradParam(self):
 		print("Linear Layer")
-		print("Weights")
+		# print("Weights")
 		print(self.W)
-		print("Biases")
+		# print("Biases")
 		print(self.B)
 
 	def updateParam(self, learningRate):
