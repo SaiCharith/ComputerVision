@@ -7,6 +7,10 @@ import Criterion
 dtype = torch.double
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+def pause():
+	print("press enter")
+	input()
+
 class Model:
 	def __init__(self):
 		self.Layers = []
@@ -30,8 +34,8 @@ class Model:
 			layer.updateParam(learningRate)
 
 	def dispGradParam(self):
-		for i in range(len(Self.Layers)):
-			self.Layers[-i-1].dispGradParam
+		for i in range(len(self.Layers)):
+			self.Layers[-i-1].dispGradParam()
 
 	def clearGradParam(self):
 		for layer in self.Layers:
@@ -51,8 +55,10 @@ class Model:
 				gradOutput = criterion.backward(activations, trainingLabels[batchSize*j:(j+1)*batchSize])
 				self.backward(trainingData[batchSize*j:(j+1)*batchSize], gradOutput)
 				self.updateParam(learningRate)
+				self.dispGradParam()
+				pause()
 			predictions = self.classify(trainingData)
-			print("Training Accuracy: ", (tensor.sum(predictions == trainingLabels)/trainingLabels.size()[0])*100)
+			print("Training Accuracy: ", (torch.sum(predictions == trainingLabels)*100.0/trainingLabels.size()[0]))
 
 	def classify(self, data):
 		guesses = self.forward(data)

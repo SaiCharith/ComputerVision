@@ -3,6 +3,12 @@ import torch
 dtype = torch.double
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+
+def pause():
+	print("press enter")
+	input()
+
+
 class Criterion:
 	def __init__(self):
 		return
@@ -17,7 +23,14 @@ class Criterion:
 
 	def backward(self, input, target):
 		batch_size, num_classes = input.size()
-		
+		print(input)
 		inputExp = input.exp()
-		probabilities = inputExp/inputExp.sum(dim=1).unsqueeze(1)
-		return (probabilities - torch.eye(num_classes, dtype=dtype)[target])/batch_size
+		print("EXP")
+		print(inputExp)
+		pause()
+		probabilities = inputExp/(inputExp.sum(dim=1).unsqueeze(1))
+		grads = (probabilities - torch.eye(num_classes, dtype=dtype)[target])/batch_size
+		print("Criterion")
+		print(grads)
+		pause()
+		return grads

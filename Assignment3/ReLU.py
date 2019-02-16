@@ -10,11 +10,11 @@ class ReLU:
 
 	def forward(self, input):
 		self.output = input
-		self.output[input<0] = 0
+		self.output[input<0] = 0.0
 	
 	def backward(self, input, gradOutput):
 		self.gradInput = gradOutput
-		self.gradInput[input < 0] = 0
+		self.gradInput[input < 0] = 0.0
 		return self.gradInput
 
 	def clearGradParam(self):
