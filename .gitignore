@@ -1,6 +1,5 @@
-
-
+*.bin
 *.aux
 *.log
 *.synctex.gz
-problem.pdf
+*problem.pdf
