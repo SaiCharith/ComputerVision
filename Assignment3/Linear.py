@@ -1,6 +1,8 @@
 import numpy as np
 import torch
-dtype = (torch.cuda.doubleTensor if torch.cuda.is_available() else torch.double)
+
+
+dtype = torch.double
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 

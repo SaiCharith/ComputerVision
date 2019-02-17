@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+
 dtype = torch.double
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -17,21 +18,29 @@ class Criterion:
 		batch_size, num_classes = input.size()
 		
 		inputExp = input.exp()
-		self.probabilities = inputExp/inputExp.sum(dim=1).unsqueeze(1)
-		loss = -self.probabilities.log()
-		return torch.sum(loss*torch.eye(num_classes, dtype=dtype)[target])/batch_size
+		probabilities = inputExp/inputExp.sum(dim=1).unsqueeze(1)
+		probabilities[torch.isnan(probabilities)] = 1
+		probabilities = probabilities/(probabilities.sum(dim=1).unsqueeze(1))
+		loss = -probabilities.log()
+		labels = torch.eye(num_classes, device=device, dtype=dtype)[target]
+		loss[labels!=1] = 0 
+		# loss[loss==float('inf')] = 10.0**10
+		loss = loss/batch_size
+		avgLoss = torch.sum(loss)
+		# torch.set_printoptions(profile="full")
+		# print(loss,avgLoss)
+		# torch.set_printoptions(profile="default")
+		# pause()
+		# if(avgLoss.item()==0.0):
+		# 	print(input)
+		return avgLoss
 
 	def backward(self, input, target):
 		batch_size, num_classes = input.size()
-		# print(input)
 		inputExp = input.exp()
-		# print("EXP")
-		# print(inputExp)
-		# pause()
 		probabilities = inputExp/(inputExp.sum(dim=1).unsqueeze(1))
 		probabilities[torch.isnan(probabilities)] = 1
-		grads = (probabilities - torch.eye(num_classes, dtype=dtype)[target])/batch_size
-		# print("Criterion")
-		# print(grads)
-		# pause()
+		probabilities = probabilities/(probabilities.sum(dim=1).unsqueeze(1))
+		labels = torch.eye(num_classes, device=device, dtype=dtype)[target]
+		grads = (probabilities - labels)/batch_size
 		return grads
