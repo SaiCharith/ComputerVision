@@ -35,6 +35,7 @@ class Criterion:
 		# 	print(input)
 		return avgLoss
 
+
 	def backward(self, input, target):
 		batch_size, num_classes = input.size()
 		inputExp = input.exp()
