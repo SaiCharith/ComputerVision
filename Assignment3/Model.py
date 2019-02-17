@@ -69,17 +69,10 @@ class Model:
 			print(4, torch.sum(predictions == 4).item())
 			print(5, torch.sum(predictions == 5).item())
 			print(torch.sum(predictions == trainingLabels).item())
-			# print(list(zip(predictions,trainingLabels)))
-			print(0,torch.sum(predictions == 0).item())
-			print(1,torch.sum(predictions == 1).item())
-			print(2,torch.sum(predictions == 2).item())
-			print(3,torch.sum(predictions == 3).item())
-			print(4,torch.sum(predictions == 4).item())
-			print(5,torch.sum(predictions == 5).item())
-			print(6,torch.sum(predictions == 6).item())
 			print("Training Loss",criterion.forward(self.forward(trainingData), trainingLabels).item())
 			print("Training Accuracy: ", (torch.sum(predictions == trainingLabels).item()*100.0/trainingLabels.size()[0]))
 
 	def classify(self, data):
 		guesses = self.forward(data)
 		value, indices = torch.max(guesses,dim=1)
+		return indices

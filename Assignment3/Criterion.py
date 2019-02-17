@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 
+
 dtype = torch.double
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -18,19 +19,16 @@ class Criterion:
 		batch_size, num_classes = input.size()
 		
 		inputExp = input.exp()
+
 		probabilities = inputExp/inputExp.sum(dim=1).unsqueeze(1)
 		probabilities[torch.isnan(probabilities)] = 1
 		probabilities = probabilities/(probabilities.sum(dim=1).unsqueeze(1))
 		loss = -probabilities.log()
 		labels = torch.eye(num_classes, device=device, dtype=dtype)[target]
 		loss[labels!=1] = 0 
-		# loss[loss==float('inf')] = 10.0**10
+		# loss[loss==float('inf')] = 100
 		loss = loss/batch_size
 		avgLoss = torch.sum(loss)
-		# torch.set_printoptions(profile="full")
-		# print(loss,avgLoss)
-		# torch.set_printoptions(profile="default")
-		# pause()
 		# if(avgLoss.item()==0.0):
 		# 	print(input)
 		return avgLoss
