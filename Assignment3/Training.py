@@ -42,22 +42,10 @@ def createModel():
 	trainingData, trainingLabels, validationData, validationLabels = loadData()
 
 	neuralNetwork = Model.Model()
-	neuralNetwork.addLayer(Linear.Linear(108*108,1350))
+	neuralNetwork.addLayer(Linear.Linear(108*108,106))
 	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(1350, 1002))
-	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(1002,732))
-	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(732,501))
-	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(501, 309))
-	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(309, 102))
-	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(102,54))
-	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(54,6))
-	learningRate = 0.00000001
+	neuralNetwork.addLayer(Linear.Linear(106,6))
+	learningRate = 0.00001
 	batchSize = 30
 	epochs = 50
 
