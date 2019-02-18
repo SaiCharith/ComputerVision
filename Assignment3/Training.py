@@ -16,40 +16,61 @@ def loadData():
 	TESTING_DATA = "Test/test.bin"
 
 	Data = torch.tensor(torchfile.load(TRAINING_DATA), dtype=dtype, device=device)
-	Data = Data/256.0
 	Labels = torch.tensor(torchfile.load(TRAINING_LABELS), dtype=torch.long, device=device)
 
-	Data = Data/256.0
+	Data = Data/(256.0)
 
 	SIZE = Data.size()[0]
 	HEIGHT = Data.size()[1]
 	WIDTH = Data.size()[2]
 	TRAINING_SIZE = int(0.7*SIZE)
-	VALIDATION_SIZE = SIZE - TRAINING_SIZE
+	VALIDATION_SIZE = int(0.3*SIZE)
 
 	Data = Data.reshape(SIZE, HEIGHT*WIDTH)
 	indices = list(range(SIZE))
 	random.shuffle(indices)
+  
+
 
 	trainingData = Data[indices[0:TRAINING_SIZE]]
+	trainingMean = trainingData.mean(dim=0)
 	trainingLabels = Labels[indices[0:TRAINING_SIZE]]
 	validationData = Data[indices[TRAINING_SIZE:]]
 	validationLabels = Labels[indices[TRAINING_SIZE:]]
 
-	return trainingData, trainingLabels, validationData, validationLabels
+	return trainingData, trainingLabels, validationData, validationLabels, trainingMean
+
 
 def createModel():
-	trainingData, trainingLabels, validationData, validationLabels = loadData()
+	trainingData, trainingLabels, validationData, validationLabels, trainingMean = loadData()
+
+	trainingData = trainingData - trainingMean
+	validationData = validationData - trainingMean
 
 	neuralNetwork = Model.Model()
-	neuralNetwork.addLayer(Linear.Linear(108*108,106))
+	neuralNetwork.addLayer(Linear.Linear(108*108,1002))
 	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(106,6))
-	learningRate = 0.00001
-	batchSize = 30
-	epochs = 50
+	neuralNetwork.addLayer(Linear.Linear(1002, 154))
+	neuralNetwork.addLayer(ReLU.ReLU())
+	# neuralNetwork.addLayer(Linear.Linear(1002,1002))
+	# neuralNetwork.addLayer(ReLU.ReLU())
+	# neuralNetwork.addLayer(Linear.Linear(1002,501))
+	# neuralNetwork.addLayer(ReLU.ReLU())
+	# neuralNetwork.addLayer(Linear.Linear(501, 309))
+	# neuralNetwork.addLayer(ReLU.ReLU())
+	# neuralNetwork.addLayer(Linear.Linear(309, 102))
+	# neuralNetwork.addLayer(ReLU.ReLU())
+	# neuralNetwork.addLayer(Linear.Linear(102,54))
+	# neuralNetwork.addLayer(ReLU.ReLU())
+	neuralNetwork.addLayer(Linear.Linear(154,6))
 
-	neuralNetwork.trainModel(learningRate, batchSize, epochs, trainingData, trainingLabels)
+
+	learningRate = 0.01
+	batchSize = 20
+	epochs = 12
+	alpha = 0.5
+
+	neuralNetwork.trainModel(learningRate, batchSize, epochs, trainingData, trainingLabels, alpha)
 
 	predictions = neuralNetwork.classify(validationData)
 	print(torch.sum(predictions == validationLabels).item())
@@ -63,14 +84,18 @@ createModel()
 
 
 
-
-
-
-# neuralNetwork = Model.Model()
-# neuralNetwork.addLayer(Linear.Linear(108*108,356))
+# neuralNetwork.addLayer(Linear.Linear(108*108,1002))
 # neuralNetwork.addLayer(ReLU.ReLU())
-# neuralNetwork.addLayer(Linear.Linear(356, 6))
-
-# learningRate = 0.008
-# batchSize = 30
-# epochs = 100
+# neuralNetwork.addLayer(Linear.Linear(1002, 1002))
+# neuralNetwork.addLayer(ReLU.ReLU())
+# neuralNetwork.addLayer(Linear.Linear(1002,1002))
+# neuralNetwork.addLayer(ReLU.ReLU())
+# neuralNetwork.addLayer(Linear.Linear(1002,501))
+# neuralNetwork.addLayer(ReLU.ReLU())
+# neuralNetwork.addLayer(Linear.Linear(501, 309))
+# neuralNetwork.addLayer(ReLU.ReLU())
+# neuralNetwork.addLayer(Linear.Linear(309, 102))
+# neuralNetwork.addLayer(ReLU.ReLU())
+# neuralNetwork.addLayer(Linear.Linear(102,54))
+# neuralNetwork.addLayer(ReLU.ReLU())
+# neuralNetwork.addLayer(Linear.Linear(54,6))

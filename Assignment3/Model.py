@@ -30,11 +30,11 @@ class Model:
 			gradOutput = self.Layers[-i-1].backward(inputPrev, gradOutput)
 		gradOutput = self.Layers[0].backward(input, gradOutput)
 
-	def updateParam(self, learningRate):
+	def updateParam(self, learningRate, alpha):
 		# print("Updating Weights & Biases: ")
 		for layer in self.Layers:
 			# layer.dispGradParam()
-			layer.updateParam(learningRate)
+			layer.updateParam(learningRate,alpha)
 			# layer.dispGradParam()
 
 	def dispGradParam(self):
@@ -48,7 +48,7 @@ class Model:
 	def addLayer(self, layer):
 		self.Layers.append(layer)
 
-	def trainModel(self, learningRate, batchSize, epochs, trainingData, trainingLabels):
+	def trainModel(self, learningRate, batchSize, epochs, trainingData, trainingLabels, alpha=0):
 		trainingDataSize = trainingData.size()[0]
 		criterion = Criterion.Criterion()
 		numBatches = trainingDataSize//batchSize + 1*(trainingDataSize%batchSize!=0)
@@ -59,7 +59,7 @@ class Model:
 				gradOutput = criterion.backward(activations, trainingLabels[batchSize*j:(j+1)*batchSize])
 				# print("BatchLoss: ",criterion.forward(activations, trainingLabels[batchSize*j:(j+1)*batchSize]).item())
 				self.backward(trainingData[batchSize*j:(j+1)*batchSize], gradOutput)
-				self.updateParam(learningRate/((i+1)**0.7))
+				self.updateParam(learningRate/((i+1)**0.7),alpha/((i+1)**0.7))
 
 			predictions = self.classify(trainingData)
 			print(0, torch.sum(predictions == 0).item())
