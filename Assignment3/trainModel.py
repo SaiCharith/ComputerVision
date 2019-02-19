@@ -5,6 +5,7 @@ sys.path.insert(0, './src')
 import Linear
 import ReLU
 import Model
+import BatchNorm
 
 import argparse
 import torch
@@ -58,7 +59,8 @@ if __name__=='__main__':
 	validationData -= trainingMean
 
 	neuralNetwork = Model.Model()
-	neuralNetwork.addLayer(Linear.Linear(108*108,1024))
+	neuralNetwork.addLayer(BatchNorm.BatchNorm())
+	neuralNetwork.addLayer(Linear.Linear(108*108,6))
 	neuralNetwork.addLayer(ReLU.ReLU())
 	neuralNetwork.addLayer(Linear.Linear(1024,6))
 
@@ -77,5 +79,5 @@ if __name__=='__main__':
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 
-	neuralNetwork.saveModel(directory+"modelConfig.txt",directory+"ModelWeights.bin",directory+"ModelBiases.bin")
-	torch.save(trainingMean,directory+"trainingMean.bin")
+	# neuralNetwork.saveModel(directory+"modelConfig.txt",directory+"ModelWeights.bin",directory+"ModelBiases.bin")
+	# torch.save(trainingMean,directory+"trainingMean.bin")
