@@ -45,3 +45,7 @@ class Linear:
 		self.momentumB = alpha*self.momentumB - learningRate*self.gradB
 		# self.W -= learningRate*self.gradW
 		# self.B -= learningRate*self.gradB
+	def set_W(self,W):
+		self.W=W
+	def set_B(self,b):
+		self.B=b

@@ -76,3 +76,7 @@ class Model:
 		guesses = self.forward(data)
 		value, indices = torch.max(guesses,dim=1)
 		return indices
+
+	def setParams(self,W,b,ind):
+		self.Layers[ind].set_W(W)
+		self.Layers[ind].set_B(b)
