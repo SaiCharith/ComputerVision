@@ -95,22 +95,6 @@ class Model:
 		torch.save(lW,filePath1)
 		torch.save(lB,filePath2)
 
-	# def loadModel(self,filePathConfig, filePathW, filePathB):
-	# 	lW = []
-	# 	try:
-	# 	 	lW = torch.load(filePathW)
-	# 	 	lB = torch.load(filePathB)
-	# 	except:
-	# 	 	lW = torchfile.load(filePathW)
-	# 	 	lB = torchfile.load(filePathB)
-
-	# 	i=0
-	# 	for layer in self.Layers:
-	# 		if layer.layerName == 'linear':
-	# 			layer.W = lW[i]
-	# 			layer.B = lB[i]
-	# 			i+=1
-
 	def loadModel(self,path_config):
 
 		with open(path_config) as f:
@@ -138,8 +122,6 @@ class Model:
 				pass
 			pass
 
-		# bias = torch.load(layer_bias_path)
-		# weights = torch.load(layer_w_path)
 		indices=[]
 		j = 0
 		for i in range(1,len(content)-2):
@@ -157,7 +139,7 @@ class Model:
 				else:
 					self.Layers[-1].W = torch.from_numpy(weights[j])#.clone().detach().requires_grad_(True)
 					self.Layers[-1].B = torch.from_numpy(bias[j]).reshape(self.Layers[-1].B.size())#.clone().detach()
-
+				j+=1
 				print(type(self.Layers[-1].B))#,self.Layers[-1].B.size())
 				indices.append(i-1)
 			elif(words[0]=='relu'):

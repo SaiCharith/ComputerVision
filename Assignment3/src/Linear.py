@@ -29,8 +29,6 @@ class Linear:
 		self.gradInput = gradOutput.mm(self.W)
 		self.gradB = gradOutput.sum(dim = 0).reshape(self.out_neurons,1)
 		self.gradW = gradOutput.transpose(0,1).mm(input)
-
-		# print("Linear Layer Backward")
 		return self.gradInput
 
 	def clearGradParam(self):
@@ -45,5 +43,4 @@ class Linear:
 		self.B += self.momentumB
 		self.momentumW = alpha*self.momentumW - learningRate*self.gradW
 		self.momentumB = alpha*self.momentumB - learningRate*self.gradB
-		# self.W -= learningRate*self.gradW
-		# self.B -= learningRate*self.gradB
+
