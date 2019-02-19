@@ -17,7 +17,7 @@ class ReLU:
 	
 	def backward(self, input, gradOutput):
 		self.gradInput = gradOutput
-		self.gradInput[input < 0] = 0
+		self.gradInput[input <= 0] = 0
 		# print("ReLU Layer backward")
 		return self.gradInput
 
