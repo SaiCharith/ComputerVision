@@ -59,9 +59,10 @@ if __name__=='__main__':
 	validationData -= trainingMean
 
 	neuralNetwork = Model.Model()
-	neuralNetwork.addLayer(BatchNorm.BatchNorm())
-	neuralNetwork.addLayer(Linear.Linear(108*108,6))
+	
+	neuralNetwork.addLayer(Linear.Linear(108*108,1024))
 	neuralNetwork.addLayer(ReLU.ReLU())
+	neuralNetwork.addLayer(BatchNorm.BatchNorm())
 	neuralNetwork.addLayer(Linear.Linear(1024,6))
 
 	learningRate = 0.01
