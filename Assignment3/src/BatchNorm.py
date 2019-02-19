@@ -10,7 +10,7 @@ class BatchNorm:
 		self.layerName = 'BatchNorm'
 		self.batch_mean=None
 		self.batch_std=None
-	def forward(self, input):
+	def forward(self, input,isTrain=False):
 		self.batch_mean=input.mean(dim=0)
 		self.batch_std=input.std(dim=0)
 		self.output = (input-self.batch_mean)/self.batch_std

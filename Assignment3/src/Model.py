@@ -17,10 +17,10 @@ class Model:
 		self.Layers = []
 		self.isTrain = True
 
-	def forward(self, input):
+	def forward(self, input,isTrain=False):
 		# print("Forwarding: ")
 		for layer in self.Layers:
-			input = layer.forward(input)
+			input = layer.forward(input,isTrain)
 		return input
 
 	def backward(self, input, gradOutput):
@@ -56,7 +56,7 @@ class Model:
 		for i in range(epochs):
 			print("Epoch ", i)
 			for j in range(numBatches):
-				activations = self.forward(trainingData[batchSize*j:(j+1)*batchSize])
+				activations = self.forward(trainingData[batchSize*j:(j+1)*batchSize],True)
 				gradOutput = criterion.backward(activations, trainingLabels[batchSize*j:(j+1)*batchSize])
 				# print("BatchLoss: ",criterion.forward(activations, trainingLabels[batchSize*j:(j+1)*batchSize]).item())
 				self.backward(trainingData[batchSize*j:(j+1)*batchSize], gradOutput)
@@ -84,6 +84,12 @@ class Model:
 				lB.append(layer.B)
 			if layer.layerName == 'relu':
 				f.write("relu"+"\n")
+			if layer.layerName == 'Dropout':
+				f.write("Dropout"+"\n")
+			if layer.layerName == 'LeakyRelu':
+				f.write("LeakyRelu"+"\n")
+			if layer.layerName == 'BatchNorm':
+				f.write("BatchNorm"+"\n")
 		f.write(filePath1+"\n")
 		f.write(filePath2)
 		f.close()
@@ -125,7 +131,7 @@ class Model:
 			if(words[0]=='linear'):
 				in_nodes=int(words[1])
 				out_nodes=int(words[2])
-				print("creating linear layer with " + str(in_nodes) +" "+str(out_nodes))
+				# print("creating linear layer with " + str(in_nodes) +" "+str(out_nodes))
 				self.addLayer(Linear.Linear(in_nodes,out_nodes))
 				# print(self.Layers[-1].B.size())
 				if type(self.Layers[-1].W)==type(weights[j]):
@@ -138,8 +144,15 @@ class Model:
 				# print(type(self.Layers[-1].B))#,self.Layers[-1].B.size())
 				indices.append(i-1)
 			elif(words[0]=='relu'):
-				print("creating relu layer")
+				# print("creating relu layer")
 				self.addLayer(ReLU.ReLU())
+			elif(words[0]=='Dropout'):
+				self.addLayer(Dropout.Dropout())
+			elif(words[0]=='LeakyRelu'):
+				self.addLayer(LeakyRelu.LeakyRelu())
+			elif(words[0]=='BatchNorm'):
+				self.addLayer(BatchNorm.BatchNorm())
+
 			
 	def save_Grads(self,path_w,path_b):
 		lb=[]

@@ -21,7 +21,7 @@ class Linear:
 		self.momentumW = torch.zeros(out_neurons, in_neurons, dtype=dtype, device=device)
 		self.momentumB = torch.zeros(out_neurons, 1, dtype=dtype, device=device)
 	
-	def forward(self, input):
+	def forward(self, input,isTrain=False):
 		self.output = input.mm(self.W.transpose(0,1)).add(self.B.transpose(0,1))
 		return self.output
 

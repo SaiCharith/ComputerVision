@@ -9,7 +9,7 @@ class ReLU:
 		self.gradInput = None
 		self.layerName = 'relu'
 
-	def forward(self, input):
+	def forward(self, input,isTrain=False):
 		self.output = input
 		self.output[input<0] = 0
 		return self.output

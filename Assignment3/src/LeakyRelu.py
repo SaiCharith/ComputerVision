@@ -4,13 +4,13 @@ dtype = torch.double
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class LeakyRelu:
-	def __init__(self,leak=1e-3):
+	def __init__(self,leak=1e-2):
 		self.output = None
 		self.gradInput = None
-        self.leak=leak
+		self.leak=leak
 		self.layerName = 'LeakyRelu'
 
-	def forward(self, input):
+	def forward(self, input,isTrain=False):
 		self.output = input
 		self.output[input<0] = self.leak*self.output[input<0]
 		return self.output
@@ -18,7 +18,7 @@ class LeakyRelu:
 	
 	def backward(self, input, gradOutput):
 		self.gradInput = gradOutput
-		self.gradInput[input <= 0] = self.leak*self.gradOutput[input<=0]
+		self.gradInput[input <= 0] = self.leak*gradOutput[input<=0]
 		# print("LeakyRelu Layer backward")
 		return self.gradInput
 
