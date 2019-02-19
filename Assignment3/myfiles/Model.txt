@@ -1,0 +1,5 @@
+2
+linear 11664 6
+relu
+ModelWeights.bin
+ModelBiases.bin

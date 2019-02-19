@@ -1,0 +1,4 @@
+1
+linear 192 10
+./W_sample_1.bin
+./B_sample_1.bin
