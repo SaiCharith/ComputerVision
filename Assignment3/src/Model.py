@@ -27,8 +27,13 @@ class Model:
 		# print("Backpropogation: ")
 		for i in range(len(self.Layers) - 1):
 			inputPrev = self.Layers[-i-2].output
+			print("prev")
+			print(gradOutput)
 			gradOutput = self.Layers[-i-1].backward(inputPrev, gradOutput)
+			print("new")			
+			print(gradOutput)
 		gradOutput = self.Layers[0].backward(input, gradOutput)
+		print(gradOutput)
 		return gradOutput
 
 	def updateParam(self, learningRate, alpha):
@@ -170,7 +175,8 @@ class Model:
 		lw=[]
 		for layer in self.Layers:
 			if (layer.layerName=='linear'):
-				lb.append(layer.gradB)
+				# print(layer.gradB)
+				lb.append(layer.gradB.reshape(layer.out_neurons))
 				lw.append(layer.gradW)
 		torch.save(lw,path_w)
 		torch.save(lb,path_b)

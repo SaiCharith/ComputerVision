@@ -22,9 +22,15 @@ for l in range(len(my_list)):
         sample_out=torch.tensor(sample_out)
         print(torch.sum((sample_out-my_out)**2))
     else:
+        if(l==1):   
+            print(sample_out)
         for m in range(len(my_out)):
+            
             sample_1=torch.tensor(sample_out[m])
             my_1=my_out[m]
+            # if m==0:
+            #     print(sample_1)
+            #     print(my_1)
             print(torch.sum((sample_1-my_1)**2))
 
 

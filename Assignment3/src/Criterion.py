@@ -25,7 +25,10 @@ class Criterion:
 		probabilities = probabilities/(probabilities.sum(dim=1).unsqueeze(1))
 		loss = -probabilities.log()
 		labels = torch.eye(num_classes, device=device, dtype=dtype)[target]
-		loss[labels!=1] = 0 
+		print(labels.size())
+		print(loss.size())
+		# print(labels)
+		# loss[labels!=1] = 0 
 		# loss[loss==float('inf')] = 100
 		loss = loss/batch_size
 		avgLoss = torch.sum(loss)
