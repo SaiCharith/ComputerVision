@@ -29,6 +29,7 @@ class Model:
 			inputPrev = self.Layers[-i-2].output
 			gradOutput = self.Layers[-i-1].backward(inputPrev, gradOutput)
 		gradOutput = self.Layers[0].backward(input, gradOutput)
+		return gradOutput
 
 	def updateParam(self, learningRate, alpha):
 		# print("Updating Weights & Biases: ")
@@ -77,6 +78,9 @@ class Model:
 		value, indices = torch.max(guesses,dim=1)
 		return indices
 
+	def setParams(self,W,b,ind):
+		self.Layers[ind].set_W(W)
+		self.Layers[ind].set_B(b)
 	def saveModel(self, filepath0, filePath1, filePath2):
 		lW = []
 		lB = []
@@ -101,9 +105,9 @@ class Model:
 			content = f.readlines()
 			# you may also want to remove whitespace characters like \n at the end of each line
 			content = [x.strip() for x in content]
-		print (content)
+		# print (content)
 		no_layers=int(content[0])
-		print (no_layers)
+		# print (no_layers)
 		layer_w_path=content[-2]
 		layer_bias_path=content[-1]
 		# weights=[]
@@ -145,3 +149,13 @@ class Model:
 			elif(words[0]=='relu'):
 				print("creating relu layer")
 				self.addLayer(ReLU.ReLU())
+			
+	def save_Grads(self,path_w,path_b):
+		lb=[]
+		lw=[]
+		for layer in self.Layers:
+			if (layer.layerName=='linear'):
+				lb.append(layer.gradB)
+				lw.append(layer.gradW)
+		torch.save(lw,path_w)
+		torch.save(lb,path_b)
