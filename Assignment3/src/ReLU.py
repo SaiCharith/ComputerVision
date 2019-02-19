@@ -27,6 +27,6 @@ class ReLU:
 	def dispGradParam(self):
 		print("ReLU Layer")
 
-	def updateParam(self, learningRate, alpha):
+	def updateParam(self, learningRate, alpha,regularizer=0):
 		# print("ReLU Layer Update Weights & Biases: ")
 		return

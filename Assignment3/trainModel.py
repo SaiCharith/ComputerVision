@@ -58,9 +58,9 @@ if __name__=='__main__':
 	validationData -= trainingMean
 
 	neuralNetwork = Model.Model()
-	neuralNetwork.addLayer(Linear.Linear(108*108,102))
+	neuralNetwork.addLayer(Linear.Linear(108*108,1024))
 	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(102,6))
+	neuralNetwork.addLayer(Linear.Linear(1024,6))
 
 	learningRate = 0.01
 	batchSize = 20

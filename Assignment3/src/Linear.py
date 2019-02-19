@@ -38,9 +38,9 @@ class Linear:
 	def dispGradParam(self):
 		print("Linear Layer")
 
-	def updateParam(self, learningRate, alpha=0):
-		self.W += self.momentumW
-		self.B += self.momentumB
+	def updateParam(self, learningRate, alpha=0, regularizer=0):
+		self.W += (self.momentumW -2*regularizer*self.W)
+		self.B += (self.momentumB -2*regularizer*self.B)
 		self.momentumW = alpha*self.momentumW - learningRate*self.gradW
 		self.momentumB = alpha*self.momentumB - learningRate*self.gradB
 
