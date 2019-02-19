@@ -10,6 +10,7 @@ class Linear:
 	def __init__(self, in_neurons, out_neurons):
 		self.out_neurons = out_neurons
 		self.in_neurons = in_neurons
+		self.layerName = 'linear'
 
 		self.output = None # batch_size X out_neurons
 		self.W = torch.randn(out_neurons, in_neurons, dtype=dtype, device=device)*math.sqrt(2.0/self.in_neurons) # out_neurons X in_neurons
@@ -22,6 +23,7 @@ class Linear:
 	
 	def forward(self, input):
 		self.output = input.mm(self.W.transpose(0,1)).add(self.B.transpose(0,1))
+		return self.output
 
 	def backward(self, input, gradOutput):
 		self.gradInput = gradOutput.mm(self.W)

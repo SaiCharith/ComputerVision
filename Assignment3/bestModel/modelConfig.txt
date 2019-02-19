@@ -1,0 +1,6 @@
+2
+linear 192 10
+relu
+linear 10 3
+./bestModel/W_sample.bin
+./bestModel/B_sample.bin

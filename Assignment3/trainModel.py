@@ -11,22 +11,29 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def loadData():
-	TRAINING_DATA = "Train/data.bin"
-	TRAINING_LABELS = "Train/labels.bin"
+	# TRAINING_DATA = "Train/data.bin"
+	TRAINING_DATA = "input_sample_1.bin"
+	
+	# TRAINING_LABELS = "Train/labels.bin"
+	TRAINING_LABELS = "target_sample_1.bin"
 	TESTING_DATA = "Test/test.bin"
 
 	Data = torch.tensor(torchfile.load(TRAINING_DATA), dtype=dtype, device=device)
 	Labels = torch.tensor(torchfile.load(TRAINING_LABELS), dtype=torch.long, device=device)
 
 	Data = Data/(256.0)
-
+	print (Data.size())
 	SIZE = Data.size()[0]
-	HEIGHT = Data.size()[1]
-	WIDTH = Data.size()[2]
+	# HEIGHT = Data.size()[1]
+	# WIDTH = Data.size()[2]
+	# # DEPTH = Data.size()[3]
 	TRAINING_SIZE = int(0.7*SIZE)
 	VALIDATION_SIZE = int(0.3*SIZE)
+	sz=1
+	for i in Data.size():
+		sz=sz*i
 
-	Data = Data.reshape(SIZE, HEIGHT*WIDTH)
+	Data = Data.reshape(SIZE, int(sz/SIZE))
 	indices = list(range(SIZE))
 	random.shuffle(indices)
   
@@ -48,10 +55,10 @@ def createModel():
 	validationData = validationData - trainingMean
 
 	neuralNetwork = Model.Model()
-	neuralNetwork.addLayer(Linear.Linear(108*108,1002))
-	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(1002, 154))
-	neuralNetwork.addLayer(ReLU.ReLU())
+	# neuralNetwork.addLayer(Linear.Linear(108*108,6))
+	# neuralNetwork.addLayer(ReLU.ReLU())
+	# neuralNetwork.addLayer(Linear.Linear(1002, 154))
+	# neuralNetwork.addLayer(ReLU.ReLU())
 	# neuralNetwork.addLayer(Linear.Linear(1002,1002))
 	# neuralNetwork.addLayer(ReLU.ReLU())
 	# neuralNetwork.addLayer(Linear.Linear(1002,501))
@@ -62,15 +69,19 @@ def createModel():
 	# neuralNetwork.addLayer(ReLU.ReLU())
 	# neuralNetwork.addLayer(Linear.Linear(102,54))
 	# neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(154,6))
+	# neuralNetwork.addLayer(Linear.Linear(154,6))
 
 
 	learningRate = 0.01
 	batchSize = 20
-	epochs = 12
+	epochs = 1
 	alpha = 0.5
 
-	neuralNetwork.trainModel(learningRate, batchSize, epochs, trainingData, trainingLabels, alpha)
+	# neuralNetwork.trainModel(learningRate, batchSize, epochs, trainingData, trainingLabels, alpha)
+
+	# neuralNetwork.saveModel("Model.txt","ModelWeights.bin","ModelBiases.bin")
+	neuralNetwork.loadModel("modelConfig_1.txt")
+	# neuralNetwork.trainModel(learningRate, batchSize, epochs, trainingData, trainingLabels, alpha)
 
 	predictions = neuralNetwork.classify(validationData)
 	print(torch.sum(predictions == validationLabels).item())

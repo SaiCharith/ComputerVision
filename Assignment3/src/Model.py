@@ -3,6 +3,7 @@ import torch
 import Linear
 import ReLU
 import Criterion
+import torchfile
 
 dtype = torch.double
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -19,8 +20,7 @@ class Model:
 	def forward(self, input):
 		# print("Forwarding: ")
 		for layer in self.Layers:
-			layer.forward(input)
-			input = layer.output
+			input = layer.forward(input)
 		return input
 
 	def backward(self, input, gradOutput):
@@ -29,6 +29,7 @@ class Model:
 			inputPrev = self.Layers[-i-2].output
 			gradOutput = self.Layers[-i-1].backward(inputPrev, gradOutput)
 		gradOutput = self.Layers[0].backward(input, gradOutput)
+		return gradOutput
 
 	def updateParam(self, learningRate, alpha):
 		# print("Updating Weights & Biases: ")
@@ -80,3 +81,99 @@ class Model:
 	def setParams(self,W,b,ind):
 		self.Layers[ind].set_W(W)
 		self.Layers[ind].set_B(b)
+	def saveModel(self, filepath0, filePath1, filePath2):
+		lW = []
+		lB = []
+		f= open(filepath0,"w+")
+		f.write(str(len(self.Layers))+"\n")
+		for layer in self.Layers:
+			if layer.layerName == 'linear':
+				f.write(layer.layerName+" "+str(layer.in_neurons)+" "+str(layer.out_neurons)+"\n")
+				lW.append(layer.W)
+				lB.append(layer.B)
+			if layer.layerName == 'relu':
+				f.write("relu"+"\n")
+		f.write(filePath1+"\n")
+		f.write(filePath2)
+		f.close()
+		torch.save(lW,filePath1)
+		torch.save(lB,filePath2)
+
+	# def loadModel(self,filePathConfig, filePathW, filePathB):
+	# 	lW = []
+	# 	try:
+	# 	 	lW = torch.load(filePathW)
+	# 	 	lB = torch.load(filePathB)
+	# 	except:
+	# 	 	lW = torchfile.load(filePathW)
+	# 	 	lB = torchfile.load(filePathB)
+
+	# 	i=0
+	# 	for layer in self.Layers:
+	# 		if layer.layerName == 'linear':
+	# 			layer.W = lW[i]
+	# 			layer.B = lB[i]
+	# 			i+=1
+
+	def loadModel(self,path_config):
+
+		with open(path_config) as f:
+			content = f.readlines()
+			# you may also want to remove whitespace characters like \n at the end of each line
+			content = [x.strip() for x in content]
+		# print (content)
+		no_layers=int(content[0])
+		# print (no_layers)
+		layer_w_path=content[-2]
+		layer_bias_path=content[-1]
+		# weights=[]
+		# bias =[]
+		try:
+		 	bias = torch.load(layer_bias_path)
+		 	weights = torch.load(layer_w_path)
+		except:
+			print("exept1")
+			try:
+
+				bias=torchfile.load(layer_bias_path)
+				weights=torchfile.load(layer_w_path)
+			except:
+				print("exept2")
+				pass
+			pass
+
+		# bias = torch.load(layer_bias_path)
+		# weights = torch.load(layer_w_path)
+		indices=[]
+		j = 0
+		for i in range(1,len(content)-2):
+			words=content[i].split()
+			# print(words)
+			if(words[0]=='linear'):
+				in_nodes=int(words[1])
+				out_nodes=int(words[2])
+				print("creating linear layer with " + str(in_nodes) +" "+str(out_nodes))
+				self.addLayer(Linear.Linear(in_nodes,out_nodes))
+				print(self.Layers[-1].B.size())
+				if type(self.Layers[-1].W)==type(weights[j]):
+					self.Layers[-1].W = (weights[j])#.clone().detach().requires_grad_(True)
+					self.Layers[-1].B = (bias[j]).reshape(self.Layers[-1].B.size())#.clone().detach()
+				else:
+					self.Layers[-1].W = torch.from_numpy(weights[j])#.clone().detach().requires_grad_(True)
+					self.Layers[-1].B = torch.from_numpy(bias[j]).reshape(self.Layers[-1].B.size())#.clone().detach()
+				j+=1
+				print(type(self.Layers[-1].B))#,self.Layers[-1].B.size())
+				indices.append(i-1)
+			elif(words[0]=='relu'):
+				print("creating relu layer")
+				self.addLayer(ReLU.ReLU())
+			
+	def save_Grads(self,path_w,path_b):
+		lb=[]
+		lw=[]
+		for layer in self.Layers:
+			if (layer.layerName=='linear'):
+				lb.append(layer.gradB)
+				lw.append(layer.gradW)
+		torch.save(lw,path_w)
+		torch.save(lb,path_b)

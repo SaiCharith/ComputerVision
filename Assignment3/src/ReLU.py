@@ -7,10 +7,12 @@ class ReLU:
 	def __init__(self):
 		self.output = None
 		self.gradInput = None
+		self.layerName = 'relu'
 
 	def forward(self, input):
 		self.output = input
 		self.output[input<0] = 0
+		return self.output
 		# print("ReLU Layer Forward")
 	
 	def backward(self, input, gradOutput):
