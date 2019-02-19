@@ -17,7 +17,7 @@ class ReLU:
 	
 	def backward(self, input, gradOutput):
 		self.gradInput = gradOutput
-		self.gradInput[input < 0] = 0
+		self.gradInput[input <= 0] = 0
 		# print("ReLU Layer backward")
 		return self.gradInput
 
@@ -27,6 +27,6 @@ class ReLU:
 	def dispGradParam(self):
 		print("ReLU Layer")
 
-	def updateParam(self, learningRate, alpha):
+	def updateParam(self, learningRate, alpha,regularizer=0):
 		# print("ReLU Layer Update Weights & Biases: ")
 		return
