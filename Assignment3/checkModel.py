@@ -40,7 +40,7 @@ if __name__=='__main__':
     my_inp=torch.tensor(torchfile.load(args.path_i))
     # print(sz)
     grad_Out=torch.tensor(torchfile.load(args.path_og))
-    print(grad_Out.size())
+    # print(grad_Out.size())
     sz=my_inp.size()
     t=1
     for i in range(1,len(sz)):

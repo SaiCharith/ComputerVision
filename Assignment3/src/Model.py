@@ -78,9 +78,6 @@ class Model:
 		value, indices = torch.max(guesses,dim=1)
 		return indices
 
-	def setParams(self,W,b,ind):
-		self.Layers[ind].set_W(W)
-		self.Layers[ind].set_B(b)
 	def saveModel(self, filepath0, filePath1, filePath2):
 		lW = []
 		lB = []
@@ -154,7 +151,7 @@ class Model:
 				out_nodes=int(words[2])
 				print("creating linear layer with " + str(in_nodes) +" "+str(out_nodes))
 				self.addLayer(Linear.Linear(in_nodes,out_nodes))
-				print(self.Layers[-1].B.size())
+				# print(self.Layers[-1].B.size())
 				if type(self.Layers[-1].W)==type(weights[j]):
 					self.Layers[-1].W = (weights[j])#.clone().detach().requires_grad_(True)
 					self.Layers[-1].B = (bias[j]).reshape(self.Layers[-1].B.size())#.clone().detach()
@@ -162,7 +159,7 @@ class Model:
 					self.Layers[-1].W = torch.from_numpy(weights[j])#.clone().detach().requires_grad_(True)
 					self.Layers[-1].B = torch.from_numpy(bias[j]).reshape(self.Layers[-1].B.size())#.clone().detach()
 				j+=1
-				print(type(self.Layers[-1].B))#,self.Layers[-1].B.size())
+				# print(type(self.Layers[-1].B))#,self.Layers[-1].B.size())
 				indices.append(i-1)
 			elif(words[0]=='relu'):
 				print("creating relu layer")
