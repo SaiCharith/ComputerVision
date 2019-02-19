@@ -152,7 +152,8 @@ class Model:
 		lw=[]
 		for layer in self.Layers:
 			if (layer.layerName=='linear'):
-				lb.append(layer.gradB)
+				# print(layer.gradB)
+				lb.append(layer.gradB.reshape(layer.out_neurons))
 				lw.append(layer.gradW)
 		torch.save(lw,path_w)
 		torch.save(lb,path_b)
