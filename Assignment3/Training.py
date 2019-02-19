@@ -48,10 +48,10 @@ def createModel():
 	validationData = validationData - trainingMean
 
 	neuralNetwork = Model.Model()
-	neuralNetwork.addLayer(Linear.Linear(108*108,1002))
+	neuralNetwork.addLayer(Linear.Linear(108*108,6))
 	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(1002, 154))
-	neuralNetwork.addLayer(ReLU.ReLU())
+	# neuralNetwork.addLayer(Linear.Linear(1002, 154))
+	# neuralNetwork.addLayer(ReLU.ReLU())
 	# neuralNetwork.addLayer(Linear.Linear(1002,1002))
 	# neuralNetwork.addLayer(ReLU.ReLU())
 	# neuralNetwork.addLayer(Linear.Linear(1002,501))
@@ -62,7 +62,7 @@ def createModel():
 	# neuralNetwork.addLayer(ReLU.ReLU())
 	# neuralNetwork.addLayer(Linear.Linear(102,54))
 	# neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(Linear.Linear(154,6))
+	# neuralNetwork.addLayer(Linear.Linear(154,6))
 
 
 	learningRate = 0.01

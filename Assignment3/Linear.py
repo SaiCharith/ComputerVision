@@ -22,6 +22,7 @@ class Linear:
 	
 	def forward(self, input):
 		self.output = input.mm(self.W.transpose(0,1)).add(self.B.transpose(0,1))
+		return self.output
 
 	def backward(self, input, gradOutput):
 		self.gradInput = gradOutput.mm(self.W)

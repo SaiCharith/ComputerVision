@@ -19,8 +19,7 @@ class Model:
 	def forward(self, input):
 		# print("Forwarding: ")
 		for layer in self.Layers:
-			layer.forward(input)
-			input = layer.output
+			input = layer.forward(input)
 		return input
 
 	def backward(self, input, gradOutput):
