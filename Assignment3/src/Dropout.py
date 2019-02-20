@@ -10,24 +10,25 @@ class Dropout:
 		self.drop_rate=drop_rate
 		self.layerName = 'Dropout'
 		self.pass_ind=None
+		self.istrain = False
 	def forward(self, input,istrain=False):
 
-		self.output= input*(1/self.drop_rate)
+		self.output= input
+		self.istrain = istrain
 		if istrain:
 			self.pass_ind=torch.rand(input.size()[1],dtype=dtype,device=device)
-			self.pass_ind[self.pass_ind>self.drop_rate]=0
-			# self.pass_ind[self.pass_ind>self.drop_rate]=1
-			self.output[:,(self.pass_ind==0).type(torch.ByteTensor)] = 0
+			self.pass_ind[self.pass_ind>self.drop_rate]=-1
+			self.output[:,(self.pass_ind==-1).type(torch.ByteTensor)] = 0
+			self.output *= (1/self.drop_rate)
 
-		# self.output[input<0] = 0
 		return self.output
-		# print("Dropout Layer Forward")
+
 	
 	def backward(self, input, gradOutput):
-		self.gradInput= gradOutput*(1/self.drop_rate)
-		self.gradInput[:,(self.pass_ind==0).type(torch.ByteTensor)] = 0
-		# self.gradInput[:, <= 0] = 0
-		# print("Dropout Layer backward")
+		self.gradInput= gradOutput
+		if self.istrain:
+			self.gradInput*=(1/self.drop_rate)
+			self.gradInput[:,(self.pass_ind==-1).type(torch.ByteTensor)] = 0
 		return self.gradInput
 
 	def clearGradParam(self):
