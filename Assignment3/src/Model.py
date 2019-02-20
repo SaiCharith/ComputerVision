@@ -85,9 +85,9 @@ class Model:
 			if layer.layerName == 'relu':
 				f.write("relu"+"\n")
 			if layer.layerName == 'Dropout':
-				f.write("Dropout"+"\n")
+				f.write("Dropout "+str(layer.drop_rate)+"\n")
 			if layer.layerName == 'LeakyRelu':
-				f.write("LeakyRelu"+"\n")
+				f.write("LeakyRelu "+str(layer.leak)+"\n")
 			if layer.layerName == 'BatchNorm':
 				f.write("BatchNorm"+"\n")
 		f.write(filePath1+"\n")
@@ -148,8 +148,10 @@ class Model:
 				self.addLayer(ReLU.ReLU())
 			elif(words[0]=='Dropout'):
 				self.addLayer(Dropout.Dropout())
+				self.Layers[-1].drop_rate = float(words[1])
 			elif(words[0]=='LeakyRelu'):
 				self.addLayer(LeakyRelu.LeakyRelu())
+				self.Layers[-1].leak = float(words[1])
 			elif(words[0]=='BatchNorm'):
 				self.addLayer(BatchNorm.BatchNorm())
 

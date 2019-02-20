@@ -15,7 +15,7 @@ class Dropout:
 		self.output= input*(1/self.drop_rate)
 		if istrain:
 			self.pass_ind=torch.rand(input.size()[1],dtype=dtype,device=device)
-			self.pass_ind[self.pass_ind<=self.drop_rate]=0
+			self.pass_ind[self.pass_ind>self.drop_rate]=0
 			# self.pass_ind[self.pass_ind>self.drop_rate]=1
 			self.output[:,(self.pass_ind==0).type(torch.ByteTensor)] = 0
 

@@ -1,0 +1,8 @@
+7
+linear 11664 1024
+relu
+linear 1024 512
+relu
+linear 512 6
+ModalWeights.bin
+ModelBais.bin
