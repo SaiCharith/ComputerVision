@@ -1,4 +1,0 @@
-1
-linear 192 10
-./myfiles/W_sample_1.bin
-./myfiles/B_sample_1.bin

@@ -41,7 +41,7 @@ if __name__=='__main__':
 	testData = loadData(args.dataPath)
 
 	directory = "./"+args.modelName+"/"
-	trainingMean = torch.load(directory+"trainingMean.bin")
+	trainingMean = torch.load(directory+"trainingMean.bin",map_location= {'cuda:0':'cpu'})
 	testData -= trainingMean
 
 	neuralNetwork = Model.Model()

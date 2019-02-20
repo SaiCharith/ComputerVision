@@ -1,6 +1,0 @@
-2
-linear 192 10
-relu
-linear 10 3
-./myfiles/W_sample_2.bin
-./myfiles/B_sample_2.bin

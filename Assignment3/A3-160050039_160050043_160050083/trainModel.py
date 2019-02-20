@@ -11,6 +11,8 @@ import argparse
 import torch
 import torchfile
 import random
+import Dropout
+import LeakyRelu
 
 dtype = torch.double
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -27,7 +29,7 @@ def loadData(dataPath,labelsPath):
 	Data = Data/(256.0)
 	SIZE = dataSize[0]
 
-	TRAINING_SIZE = int(0.7*SIZE)
+	TRAINING_SIZE = int(1*SIZE)
 	VALIDATION_SIZE = int(0.3*SIZE)
 
 	featureSize = 1
@@ -58,27 +60,35 @@ if __name__=='__main__':
 	trainingData -= trainingMean
 	validationData -= trainingMean
 
-	neuralNetwork = Model.Model()
-	
-	neuralNetwork.addLayer(Linear.Linear(108*108,1024))
-	neuralNetwork.addLayer(ReLU.ReLU())
-	neuralNetwork.addLayer(BatchNorm.BatchNorm())
-	neuralNetwork.addLayer(Linear.Linear(1024,6))
 
-	learningRate = 0.01
+
 	batchSize = 20
-	epochs = 20
-	alpha = 0.5
+	epochs = 50
+	lr = 0.009
+	reg = 0.000001
+	al = 0.7
+	leak = 0.01
+	dropout_rate = 0.75
+	
+	neuralNetwork = Model.Model()
+	neuralNetwork.addLayer(Linear.Linear(108*108,1024))
+	neuralNetwork.addLayer(Dropout.Dropout(dropout_rate))
+	neuralNetwork.addLayer(LeakyRelu.LeakyRelu(leak))
+	neuralNetwork.addLayer(Linear.Linear(1024, 512))
+	neuralNetwork.addLayer(Dropout.Dropout(dropout_rate))
+	neuralNetwork.addLayer(LeakyRelu.LeakyRelu(leak))
+	neuralNetwork.addLayer(Linear.Linear(512, 512))
+	neuralNetwork.addLayer(Dropout.Dropout(dropout_rate))
+	neuralNetwork.addLayer(LeakyRelu.LeakyRelu(leak))
+	neuralNetwork.addLayer(Linear.Linear(512,6))
 
-	neuralNetwork.trainModel(learningRate, batchSize, epochs, trainingData, trainingLabels, alpha)
+	neuralNetwork.trainModel(lr, batchSize, epochs, trainingData, trainingLabels, al,reg)
 
-	predictions = neuralNetwork.classify(validationData)
-	print(torch.sum(predictions == validationLabels).item())
-	print("Validation Accuracy: ", (torch.sum(predictions == validationLabels).item()*100.0/validationLabels.size()[0]))
 
 	directory = "./"+args.modelName+"/"
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 
-	# neuralNetwork.saveModel(directory+"modelConfig.txt",directory+"ModelWeights.bin",directory+"ModelBiases.bin")
-	# torch.save(trainingMean,directory+"trainingMean.bin")
+	torch.save(trainingMean,directory+"trainingMean.bin")
+	neuralNetwork.saveModel(directory+"bestModalConfig.txt",directory+"ModalWeights.bin",directory+"ModelBais.bin")
+

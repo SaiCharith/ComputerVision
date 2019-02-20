@@ -57,20 +57,28 @@ class Model:
 		numBatches = trainingDataSize//batchSize + 1*(trainingDataSize%batchSize!=0)
 		for i in range(epochs):
 			print("Epoch ", i)
-			for j in range(numBatches):
-				activations = self.forward(trainingData[batchSize*j:(j+1)*batchSize],True)
-				gradOutput = criterion.backward(activations, trainingLabels[batchSize*j:(j+1)*batchSize])
-				# print("BatchLoss: ",criterion.forward(activations, trainingLabels[batchSize*j:(j+1)*batchSize]).item())
-				self.backward(trainingData[batchSize*j:(j+1)*batchSize], gradOutput)
-				self.updateParam(learningRate/((1)**0.7),alpha/((1)**0.7),regularizer)
+			if i <= 20:
+				for j in range(numBatches):
+					activations = self.forward(trainingData[batchSize*j:(j+1)*batchSize],True)
+					gradOutput = criterion.backward(activations, trainingLabels[batchSize*j:(j+1)*batchSize])
+					# print("BatchLoss: ",criterion.forward(activations, trainingLabels[batchSize*j:(j+1)*batchSize]).item())
+					self.backward(trainingData[batchSize*j:(j+1)*batchSize], gradOutput)
+					self.updateParam(learningRate/((i+1)**0.7),alpha/((i+1)**0.7),regularizer)
+			else:
+				for j in range(numBatches):
+					activations = self.forward(trainingData[batchSize*j:(j+1)*batchSize],True)
+					gradOutput = criterion.backward(activations, trainingLabels[batchSize*j:(j+1)*batchSize])
+					# print("BatchLoss: ",criterion.forward(activations, trainingLabels[batchSize*j:(j+1)*batchSize]).item())
+					self.backward(trainingData[batchSize*j:(j+1)*batchSize], gradOutput)
+					self.updateParam(learningRate/((i-20)**0.7),alpha/((i-20)**0.7),regularizer)
 
 			predictions = self.classify(trainingData)
 			# print(torch.sum(predictions == trainingLabels).item())
 			print("Training Loss",criterion.forward(self.forward(trainingData), trainingLabels).item())
 			print("Training Accuracy: ", (torch.sum(predictions == trainingLabels).item()*100.0/trainingLabels.size()[0]))
-			if i%10==0 and i>0:
-				learningRate/=2.0
-				alpha/=2.0
+			# if i%10==0 and i>0:
+			# 	learningRate/=2.0
+			# 	alpha/=2.0
 			if i%5==0 and i>0:
 				if type(validationData)!=type(None):
 					predictions = self.classify(validationData)
@@ -120,9 +128,11 @@ class Model:
 		layer_bias_path=content[-1]
 		# weights=[]
 		# bias =[]
+		print(layer_bias_path)
+
 		try:
-		 	bias = torch.load(layer_bias_path)
-		 	weights = torch.load(layer_w_path)
+			bias = torch.load(layer_bias_path,map_location= {'cuda:0':'cpu'})
+			weights = torch.load(layer_w_path,map_location= {'cuda:0':'cpu'})
 		except:
 			print("exept1")
 			try:
@@ -147,7 +157,9 @@ class Model:
 				# print(self.Layers[-1].B.size())
 				if type(self.Layers[-1].W)==type(weights[j]):
 					self.Layers[-1].W = (weights[j])#.clone().detach().requires_grad_(True)
-					self.Layers[-1].B = (bias[j]).reshape(self.Layers[-1].B.size())#.clone().detach()
+					self.Layers[-1].W = torch.tensor(self.Layers[-1].W,dtype=dtype,device=device)
+					self.Layers[-1].B = (bias[j]).reshape(self.Layers[-1].B.size())
+					self.Layers[-1].B = torch.tensor(self.Layers[-1].B,dtype=dtype,device=device)
 				else:
 					self.Layers[-1].W = torch.from_numpy(weights[j])#.clone().detach().requires_grad_(True)
 					self.Layers[-1].B = torch.from_numpy(bias[j]).reshape(self.Layers[-1].B.size())#.clone().detach()
