@@ -4,6 +4,8 @@ import Linear
 import ReLU
 import Criterion
 import torchfile
+import Dropout
+import LeakyRelu
 
 dtype = torch.double
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -49,7 +51,7 @@ class Model:
 	def addLayer(self, layer):
 		self.Layers.append(layer)
 
-	def trainModel(self, learningRate, batchSize, epochs, trainingData, trainingLabels, alpha=0, regularizer=0):
+	def trainModel(self, learningRate, batchSize, epochs, trainingData, trainingLabels, alpha=0, regularizer=0,validationData=None,validationLabels=None):
 		trainingDataSize = trainingData.size()[0]
 		criterion = Criterion.Criterion()
 		numBatches = trainingDataSize//batchSize + 1*(trainingDataSize%batchSize!=0)
@@ -60,12 +62,21 @@ class Model:
 				gradOutput = criterion.backward(activations, trainingLabels[batchSize*j:(j+1)*batchSize])
 				# print("BatchLoss: ",criterion.forward(activations, trainingLabels[batchSize*j:(j+1)*batchSize]).item())
 				self.backward(trainingData[batchSize*j:(j+1)*batchSize], gradOutput)
-				self.updateParam(learningRate/((i+1)**0.7),alpha/((i+1)**0.7),regularizer)
+				self.updateParam(learningRate/((1)**0.7),alpha/((1)**0.7),regularizer)
 
 			predictions = self.classify(trainingData)
 			# print(torch.sum(predictions == trainingLabels).item())
 			print("Training Loss",criterion.forward(self.forward(trainingData), trainingLabels).item())
 			print("Training Accuracy: ", (torch.sum(predictions == trainingLabels).item()*100.0/trainingLabels.size()[0]))
+			if i%10==0 and i>0:
+				learningRate/=2.0
+				alpha/=2.0
+			if i%5==0 and i>0:
+				if type(validationData)!=type(None):
+					predictions = self.classify(validationData)
+					print("Testing Accuracy: ", (torch.sum(predictions == validationLabels).item()*100.0/validationLabels.size()[0]))
+
+
 
 	def classify(self, data):
 		guesses = self.forward(data)
