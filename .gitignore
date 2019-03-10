@@ -3,3 +3,4 @@
 *.log
 *.synctex.gz
 *problem.pdf
+*__pycache__
