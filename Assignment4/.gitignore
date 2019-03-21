@@ -1,0 +1,6 @@
+*.bin
+*.aux
+*.log
+*.synctex.gz
+*problem.pdf
+*.pyc
