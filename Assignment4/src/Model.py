@@ -21,14 +21,17 @@ class Model:
 
 	def forward(self, input,isTrain=False):
 		# print("Forwarding: ")
+		# print(input)
 		for layer in self.Layers:
 			input = layer.forward(input,isTrain)
-		return input
+		return input[-1]
 
 	def backward(self, input, gradOutput):
 		# print("Backpropogation: ")
+		# print(len(gradOutput),len(gradOutput[0]))
 		for i in range(len(self.Layers) - 1):
-			inputPrev = self.Layers[-i-2].output
+			# print('reached')
+			inputPrev = self.Layers[-i-2].y
 			gradOutput = self.Layers[-i-1].backward(inputPrev, gradOutput)
 		gradOutput = self.Layers[0].backward(input, gradOutput)
 		return gradOutput
@@ -51,39 +54,93 @@ class Model:
 	def addLayer(self, layer):
 		self.Layers.append(layer)
 
-	def trainModel(self, learningRate, batchSize, epochs, trainingData, trainingLabels, alpha=0, regularizer=0,validationData=None,validationLabels=None):
-		trainingDataSize = trainingData.size()[0]
-		criterion = Criterion.Criterion()
+	def convert(self,batch,unique_labels):# convert to one hot encoding and same max length 
+			max_num=float('-inf')
+			newlist=[]
+			for i in range(len(batch)):
+				l=len(batch[i])
+				if(l>max_num):
+					max_num=l
+			for i in range(max_num):
+				x=torch.zeros(len(batch),len(unique_labels), dtype=dtype, device=device)
+				for j in range(len(batch)):
+					if len(batch[j])>i:
+						# print(unique_labels.index(batch[j][i]))
+						x[j,unique_labels.index(batch[j][i])]=1
+
+				newlist.append(x)
+			return newlist
+
+	def createBatches(self,trainingData,trainingLabels, batchSize,unique_labels):
+		trainingDataSize = len(trainingData) #list of tensors
 		numBatches = trainingDataSize//batchSize + 1*(trainingDataSize%batchSize!=0)
+		dlist=[[] for _ in range(numBatches)]
+		llist=[[] for _ in range(numBatches)]
+
+		
+
+		for j in range(numBatches):
+			batch=trainingData[batchSize*j:(j+1)*batchSize]
+			labels=trainingLabels[batchSize*j:(j+1)*batchSize]
+
+			batch=self.convert(batch,unique_labels) 
+			dlist[j]=batch
+			llist[j]=labels
+		return dlist,llist
+
+	def trainModel(self, learningRate, batchSize, epochs, trainingData,unique_labels, trainingLabels, alpha=0, regularizer=0,validationData=None,validationLabels=None):
+		criterion = Criterion.Criterion()
+		
+		batchList,batchLabels = self.createBatches(trainingData,trainingLabels, batchSize,unique_labels)
+		DbatchList,DbatchLabels = self.createBatches(trainingData,trainingLabels, 1,unique_labels)
+		trainingLabels=torch.tensor(trainingLabels)
+		if type(validationData)!=type(None):
+			validationData,validationLabels1=self.createBatches(validationData,validationLabels,1,unique_labels)
 		for i in range(epochs):
 			print("Epoch ", i)
-			if i <= 20:
-				for j in range(numBatches):
-					activations = self.forward(trainingData[batchSize*j:(j+1)*batchSize],True)
-					gradOutput = criterion.backward(activations, trainingLabels[batchSize*j:(j+1)*batchSize])
-					# print("BatchLoss: ",criterion.forward(activations, trainingLabels[batchSize*j:(j+1)*batchSize]).item())
-					self.backward(trainingData[batchSize*j:(j+1)*batchSize], gradOutput)
-					self.updateParam(learningRate/((i+1)**0.7),alpha/((i+1)**0.7),regularizer)
-			else:
-				for j in range(numBatches):
-					activations = self.forward(trainingData[batchSize*j:(j+1)*batchSize],True)
-					gradOutput = criterion.backward(activations, trainingLabels[batchSize*j:(j+1)*batchSize])
-					# print("BatchLoss: ",criterion.forward(activations, trainingLabels[batchSize*j:(j+1)*batchSize]).item())
-					self.backward(trainingData[batchSize*j:(j+1)*batchSize], gradOutput)
-					self.updateParam(learningRate/((i-20)**0.7),alpha/((i-20)**0.7),regularizer)
+			for j in range(len(batchList)):
+				# print(batchList[j])
+				# print(batchList)
+				activations = self.forward(batchList[j],True)
+				# print("forward done")
+				gradOutput=[torch.zeros(len(batchList[j][0]),activations.size()[1],dtype=dtype,device=device) for _ in range(len(batchList[j]))]        # times max_len of sequence of the batch
+				# gradOutput[:] =torch.zeros(len(batchList[j][0]),activations.size()[1]) # batchsize,output channels
+				# print('max_len=',len(batchList[j]))
+				# print('batchsize=',len(batchList[j][0]))
+				# print('batchsize=',activations.size())
 
-			predictions = self.classify(trainingData)
-			# print(torch.sum(predictions == trainingLabels).item())
-			print("Training Loss",criterion.forward(self.forward(trainingData), trainingLabels).item())
+
+				gradOutput[-1] = criterion.backward(activations, batchLabels[j])
+				# print(len(gradOutput),len(gradOutput[0]))
+				self.clearGradParam()
+				# print('backward start')
+
+				self.backward(batchList[j], gradOutput)
+				# print('backward done')
+				self.updateParam(learningRate/((i+1)**0.7),alpha/((i+1)**0.7),regularizer)			
+			
+			predictions=[]
+			crit_list=[]
+			for j in range(len(DbatchList)):
+				predictions.append(self.classify(DbatchList[j])[0])
+				crit_list.append(criterion.forward(self.forward(DbatchList[j]), DbatchLabels[j]).item())
+
+			predictions=torch.tensor(predictions)
+			
+			print("Training Loss",sum(crit_list))
 			print("Training Accuracy: ", (torch.sum(predictions == trainingLabels).item()*100.0/trainingLabels.size()[0]))
-			# if i%10==0 and i>0:
-			# 	learningRate/=2.0
-			# 	alpha/=2.0
 			if i%5==0 and i>0:
 				if type(validationData)!=type(None):
-					predictions = self.classify(validationData)
-					print("Testing Accuracy: ", (torch.sum(predictions == validationLabels).item()*100.0/validationLabels.size()[0]))
-
+					predictions=[]
+					crit_list=[]
+					for j in range(len(validationData)):
+						predictions.append(self.classify(validationData[j])[0])
+						crit_list.append(criterion.forward(self.forward(validationData[j]), validationLabels[j]).item())
+					predictions=torch.tensor(predictions)
+					print("validation Loss",sum(crit_list))
+					print("Validation Accuracy: ", (torch.sum(predictions == validationLabels).item()*100.0/validationLabels.size()[0]))
+						
+					
 
 
 	def classify(self, data):

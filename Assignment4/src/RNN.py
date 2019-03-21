@@ -35,6 +35,7 @@ class RNN:
 	def forward(self, input,isTrain=False):
 		# if istrain:
 		self.y =[]
+		# print(input)
 		self.h =[torch.zeros(input[0].size()[0] , self.hidden_dim, dtype=dtype, device=device)]
 		self.prev_h = []
 		self.x = input
@@ -64,6 +65,7 @@ class RNN:
 
 		for i in reversed(range(len(input))):
 			grad_y = gradOutput[i]								# batch X output_dim
+			# print(grad_y.size(),self.grad_bias_y.size())
 			self.grad_bias_y = self.grad_bias_y.add(grad_y.sum(dim=0).reshape(self.output_dim,1))
 			self.grad_Why = self.grad_Why.add(grad_y.transpose(0,1).mm(self.h[i]))  # output X hidden
 
@@ -86,12 +88,15 @@ class RNN:
 		self.grad_bias_y = torch.zeros(self.output_dim, 1, dtype=dtype, device=device)
 
 	def updateParam(self, learningRate, alpha=0, regularizer=0):
+		# print('update')
+		# print(self.grad_Whx)
 
-		self.weights_hh += self.grad_Whh
-		self.weights_hx += self.grad_Whx
-		self.weights_hy += self.grad_Why
-		self.bias_h += self.grad_bias_h
-		self.bias_y += self.grad_bias_y
+
+		self.weights_hh -= self.grad_Whh*learningRate
+		self.weights_hx -= self.grad_Whx*learningRate
+		self.weights_hy -= self.grad_Why*learningRate
+		self.bias_h -= self.grad_bias_h*learningRate
+		self.bias_y -= self.grad_bias_y*learningRate
 
 		# self.W += (self.momentumW -2*regularizer*self.W)
 		# self.B += (self.momentumB -2*regularizer*self.B)
