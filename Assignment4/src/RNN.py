@@ -8,7 +8,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class RNN:
-	def __init__(self, input_dim, hidden_dim,output_dim):
+	def __init__(self, input_dim, hidden_dim,output_dim,mx=1.0e10):
+		self.max = mx
 		self.input_dim = input_dim
 		self.hidden_dim = hidden_dim
 		self.output_dim = output_dim
@@ -22,6 +23,7 @@ class RNN:
 		self.y = None
 		self.h = None
 		self.x = None
+		self.h_bef_act = None
 
 		self.grad_Whh = None
 		self.grad_Whx = None
@@ -37,6 +39,7 @@ class RNN:
 		self.y =[]
 		# print(input)
 		self.h =[torch.zeros(input[0].size()[0] , self.hidden_dim, dtype=dtype, device=device)]
+		self.h_bef_act = [torch.zeros(input[0].size()[0] , self.hidden_dim, dtype=dtype, device=device)]
 		self.prev_h = []
 		self.x = input
 		
@@ -47,7 +50,9 @@ class RNN:
 			Wxh_x = input[i].mm(self.weights_hx.transpose(0,1)) #  batch X hidden
 			# print(Wxh_x.size())
 			ht = Whh_h.add(Wxh_x)									#  batch X hidden
-			ht = ht.add(self.bias_h.transpose(0,1))					#  batch X hidden				
+			ht = ht.add(self.bias_h.transpose(0,1))					#  batch X hidden
+			self.h_bef_act.append(ht)	
+			# print(ht)			
 			ht = self.r.forward(ht)										#  batch X hidden
 			self.h.append(ht)
 
@@ -60,7 +65,7 @@ class RNN:
 
 	def backward(self, input, gradOutput):
 
-		grad_ht = torch.zeros((input[0].size()[0]),self.hidden_dim)			# batch X hidden
+		grad_ht = torch.zeros((input[0].size()[0]),self.hidden_dim,dtype=dtype, device=device)			# batch X hidden
 		grad_x = [None for _ in range(len(input))]
 
 		for i in reversed(range(len(input))):
@@ -68,8 +73,8 @@ class RNN:
 			# print(grad_y.size(),self.grad_bias_y.size())
 			self.grad_bias_y = self.grad_bias_y.add(grad_y.sum(dim=0).reshape(self.output_dim,1))
 			self.grad_Why = self.grad_Why.add(grad_y.transpose(0,1).mm(self.h[i]))  # output X hidden
-
-			grad_act = self.r.backward(grad_ht,self.h[i]) + grad_y.mm(self.weights_hy)	# batch X hidden
+			# print(self.h_bef_act[i],grad_ht)	
+			grad_act = self.r.backward(self.h_bef_act[i],grad_ht) + grad_y.mm(self.weights_hy)	# batch X hidden
 			self.grad_bias_h = self.grad_bias_h.add(grad_act.sum(dim=0).reshape(self.hidden_dim,1)) # hidden X 1
 			self.grad_Whh = self.grad_Whh.add(grad_act.transpose(0,1).mm(self.h[i-1]))
 			# print(self.grad_Whx.size(),grad_act.size(),input[i].size())
@@ -90,6 +95,18 @@ class RNN:
 	def updateParam(self, learningRate, alpha=0, regularizer=0):
 		# print('update')
 		# print(self.grad_Whx)
+
+		self.grad_Whh[self.grad_Whh>self.max] = self.max
+		self.grad_Whx[self.grad_Whx>self.max] = self.max
+		self.grad_Why[self.grad_Why>self.max] = self.max
+		self.grad_bias_h[self.grad_bias_h>self.max] = self.max
+		self.grad_bias_y[self.grad_bias_y>self.max] = self.max
+
+		self.grad_Whh[self.grad_Whh<-self.max] = -self.max
+		self.grad_Whx[self.grad_Whx<-self.max] = -self.max
+		self.grad_Why[self.grad_Why<-self.max] = -self.max
+		self.grad_bias_h[self.grad_bias_h<-self.max] = -self.max
+		self.grad_bias_y[self.grad_bias_y<-self.max] = -self.max
 
 
 		self.weights_hh -= self.grad_Whh*learningRate

@@ -38,7 +38,7 @@ def loadData(dataPath,labelsPath):
 	flattened = [val for sublist in Data for val in sublist]
 	unique_labels=list(np.unique(flattened))
 
-	TRAINING_SIZE = int(0.05*SIZE)
+	TRAINING_SIZE = int(0.07*SIZE)
 	VALIDATION_SIZE = int(0.3*SIZE)
 
 	indices = list(range(SIZE))
@@ -66,7 +66,7 @@ if __name__=='__main__':
 
 	batchSize = 20
 	epochs = 50
-	lr = 0.1
+	lr = 0.00001
 	reg = 0.000001
 	al = 0.7
 	leak = 0.01
