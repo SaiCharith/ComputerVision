@@ -38,7 +38,7 @@ def loadData(dataPath,labelsPath):
 	flattened = [val for sublist in Data for val in sublist]
 	unique_labels=list(np.unique(flattened))
 
-	TRAINING_SIZE = int(0.07*SIZE)
+	TRAINING_SIZE = int(0.27*SIZE)
 	VALIDATION_SIZE = int(0.3*SIZE)
 
 	indices = list(range(SIZE))
@@ -64,13 +64,13 @@ if __name__=='__main__':
 
 
 
-	batchSize = 20
+	batchSize = 1
 	epochs = 50
-	lr = 0.00001
-	reg = 0.000001
-	al = 0.7
-	leak = 0.01
-	dropout_rate = 0.75
+	lr = 1.0e-1
+	reg = 0
+	# al = 0.7
+	# leak = 0.01
+	# dropout_rate = 0.75
 	
 	neuralNetwork = Model.Model()
 	# neuralNetwork.addLayer(Linear.Linear(108*108,1024))
@@ -83,8 +83,10 @@ if __name__=='__main__':
 	# neuralNetwork.addLayer(Dropout.Dropout(dropout_rate))
 	# neuralNetwork.addLayer(LeakyRelu.LeakyRelu(leak))
 	# neuralNetwork.addLayer(Linear.Linear(512,6))
-	neuralNetwork.addLayer(RNN.RNN(len(unique_labels),64,2))
-	neuralNetwork.trainModel(lr, batchSize, epochs, trainingData,unique_labels, trainingLabels, al,reg)
+	neuralNetwork.addLayer(RNN.RNN(len(unique_labels),256,2))
+	# neuralNetwork.addLayer(RNN.RNN(64,128,16))
+	# neuralNetwork.addLayer(RNN.RNN(16,64,2))
+	neuralNetwork.trainModel(lr, batchSize, epochs, trainingData,unique_labels, trainingLabels,reg)
 
 
 	# directory = "./"+args.modelName+"/"

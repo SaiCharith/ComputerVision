@@ -127,7 +127,7 @@ class Model:
 
 			predictions=torch.tensor(predictions)
 			
-			print("Training Loss",sum(crit_list))
+			print("Training Loss",sum(crit_list)/len(crit_list))
 			print("Training Accuracy: ", (torch.sum(predictions == trainingLabels).item()*100.0/trainingLabels.size()[0]))
 			if i%5==0 and i>0:
 				if type(validationData)!=type(None):
@@ -137,7 +137,7 @@ class Model:
 						predictions.append(self.classify(validationData[j])[0])
 						crit_list.append(criterion.forward(self.forward(validationData[j]), validationLabels[j]).item())
 					predictions=torch.tensor(predictions)
-					print("validation Loss",sum(crit_list))
+					print("validation Loss",sum(crit_list)/len(crit_list))
 					print("Validation Accuracy: ", (torch.sum(predictions == validationLabels).item()*100.0/validationLabels.size()[0]))
 						
 					

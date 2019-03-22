@@ -4,3 +4,4 @@
 *.synctex.gz
 *problem.pdf
 *.pyc
+**__pycache__*

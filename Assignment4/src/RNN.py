@@ -2,23 +2,24 @@ import numpy as np
 import torch
 import math
 import ReLU
+import Tanh
 
 dtype = torch.double
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class RNN:
-	def __init__(self, input_dim, hidden_dim,output_dim,mx=1.0e10):
+	def __init__(self, input_dim, hidden_dim,output_dim,mx=1.0e4):
 		self.max = mx
 		self.input_dim = input_dim
 		self.hidden_dim = hidden_dim
 		self.output_dim = output_dim
 
-		self.weights_hh = torch.randn(hidden_dim, hidden_dim, dtype=dtype, device=device)*math.sqrt(2.0/self.hidden_dim)
-		self.weights_hx = torch.randn(hidden_dim, input_dim, dtype=dtype, device=device)*math.sqrt(2.0/self.hidden_dim)
-		self.weights_hy = torch.randn(output_dim, hidden_dim, dtype=dtype, device=device)*math.sqrt(2.0/self.hidden_dim)
-		self.bias_h = torch.randn(hidden_dim, 1, dtype=dtype, device=device)*math.sqrt(2.0/self.hidden_dim) # hidden_dim X 1
-		self.bias_y = torch.randn(output_dim, 1, dtype=dtype, device=device)*math.sqrt(2.0/self.hidden_dim) # output_dim X 1
+		self.weights_hh = torch.randn(hidden_dim, hidden_dim, dtype=dtype, device=device)*0.01	#self.hidden_dim)
+		self.weights_hx = torch.randn(hidden_dim, input_dim, dtype=dtype, device=device)*0.01	#self.hidden_dim)
+		self.weights_hy = torch.randn(output_dim, hidden_dim, dtype=dtype, device=device)*0.01	#self.hidden_dim)
+		self.bias_h = torch.randn(hidden_dim, 1, dtype=dtype, device=device)*0.01				#self.hidden_dim) # hidden_dim X 1
+		self.bias_y = torch.randn(output_dim, 1, dtype=dtype, device=device)*0.01				#self.output_dim) # output_dim X 1
 
 		self.y = None
 		self.h = None
@@ -32,7 +33,7 @@ class RNN:
 		self.grad_bias_y = None
 		self.grad_inp = None
 		self.grad_prev = None
-		self.r = ReLU.ReLU()
+		self.r = Tanh.Tanh()
 	
 	def forward(self, input,isTrain=False):
 		# if istrain:
@@ -40,7 +41,6 @@ class RNN:
 		# print(input)
 		self.h =[torch.zeros(input[0].size()[0] , self.hidden_dim, dtype=dtype, device=device)]
 		self.h_bef_act = [torch.zeros(input[0].size()[0] , self.hidden_dim, dtype=dtype, device=device)]
-		self.prev_h = []
 		self.x = input
 		
 		for i in range(len(input)):
@@ -74,9 +74,9 @@ class RNN:
 			self.grad_bias_y = self.grad_bias_y.add(grad_y.sum(dim=0).reshape(self.output_dim,1))
 			self.grad_Why = self.grad_Why.add(grad_y.transpose(0,1).mm(self.h[i]))  # output X hidden
 			# print(self.h_bef_act[i],grad_ht)	
-			grad_act = self.r.backward(self.h_bef_act[i],grad_ht) + grad_y.mm(self.weights_hy)	# batch X hidden
+			grad_act = self.r.backward(self.h_bef_act[i],grad_ht + grad_y.mm(self.weights_hy))	# batch X hidden
 			self.grad_bias_h = self.grad_bias_h.add(grad_act.sum(dim=0).reshape(self.hidden_dim,1)) # hidden X 1
-			self.grad_Whh = self.grad_Whh.add(grad_act.transpose(0,1).mm(self.h[i-1]))
+			self.grad_Whh = self.grad_Whh.add(grad_act.transpose(0,1).mm(self.h_bef_act[i-1]))
 			# print(self.grad_Whx.size(),grad_act.size(),input[i].size())
 			self.grad_Whx = self.grad_Whx.add(grad_act.transpose(0,1).mm(input[i]))   # hidden X input
 
@@ -92,28 +92,41 @@ class RNN:
 		self.grad_bias_h = torch.zeros(self.hidden_dim, 1, dtype=dtype, device=device)
 		self.grad_bias_y = torch.zeros(self.output_dim, 1, dtype=dtype, device=device)
 
+	def clip(self,M):
+		M[M>self.max] = self.max
+		M[M<-self.max] = -self.max
+		return M
+
 	def updateParam(self, learningRate, alpha=0, regularizer=0):
 		# print('update')
-		# print(self.grad_Whx)
-
-		self.grad_Whh[self.grad_Whh>self.max] = self.max
-		self.grad_Whx[self.grad_Whx>self.max] = self.max
-		self.grad_Why[self.grad_Why>self.max] = self.max
-		self.grad_bias_h[self.grad_bias_h>self.max] = self.max
-		self.grad_bias_y[self.grad_bias_y>self.max] = self.max
-
-		self.grad_Whh[self.grad_Whh<-self.max] = -self.max
-		self.grad_Whx[self.grad_Whx<-self.max] = -self.max
-		self.grad_Why[self.grad_Why<-self.max] = -self.max
-		self.grad_bias_h[self.grad_bias_h<-self.max] = -self.max
-		self.grad_bias_y[self.grad_bias_y<-self.max] = -self.max
 
 
-		self.weights_hh -= self.grad_Whh*learningRate
-		self.weights_hx -= self.grad_Whx*learningRate
-		self.weights_hy -= self.grad_Why*learningRate
-		self.bias_h -= self.grad_bias_h*learningRate
-		self.bias_y -= self.grad_bias_y*learningRate
+		# self.grad_Whh[self.grad_Whh>self.max] = self.max
+		# self.grad_Whx[self.grad_Whx>self.max] = self.max
+		# self.grad_Why[self.grad_Why>self.max] = self.max
+		# self.grad_bias_h[self.grad_bias_h>self.max] = self.max
+		# self.grad_bias_y[self.grad_bias_y>self.max] = self.max
+
+		# self.grad_Whh[self.grad_Whh<-self.max] = -self.max
+		# self.grad_Whx[self.grad_Whx<-self.max] = -self.max
+		# self.grad_Why[self.grad_Why<-self.max] = -self.max
+		# self.grad_bias_h[self.grad_bias_h<-self.max] = -self.max
+		# self.grad_bias_y[self.grad_bias_y<-self.max] = -self.max
+
+
+		grad_Whh=self.clip(self.grad_Whh)
+		grad_Whx=self.clip(self.grad_Whx)
+		grad_Why=self.clip(self.grad_Why)
+		grad_bias_h=self.clip(self.grad_bias_h)
+		grad_bias_y=self.clip(self.grad_bias_y)
+
+		self.weights_hh -= (self.grad_Whh*learningRate+2*regularizer*self.weights_hh)
+		self.weights_hx -= (self.grad_Whx*learningRate+2*regularizer*self.weights_hx)
+		self.weights_hy -= (self.grad_Why*learningRate+2*regularizer*self.weights_hy)
+		self.bias_h -= (self.grad_bias_h*learningRate+2*regularizer*self.bias_h)
+		self.bias_y -= (self.grad_bias_y*learningRate+2*regularizer*self.bias_y)
+
+		# print(self.weights_hh)
 
 		# self.W += (self.momentumW -2*regularizer*self.W)
 		# self.B += (self.momentumB -2*regularizer*self.B)

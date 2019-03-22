@@ -19,6 +19,7 @@ class Tanh:
         # print("Tanh Layer Forward")
 
     def backward(self, input, gradOutput):
+        self.temp = torch.exp(2.0*input)
         self.gradInput = gradOutput
         self.gradInput *= (4.0*self.temp)/(self.temp + 1.0)**2.0
         # print("Tanh Layer backward")
