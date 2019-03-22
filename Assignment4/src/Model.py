@@ -1,11 +1,9 @@
 import numpy as np
 import torch
-import Linear
-import ReLU
+import time
 import Criterion
 import torchfile
-import Dropout
-import LeakyRelu
+
 
 dtype = torch.double
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -95,28 +93,17 @@ class Model:
 		DbatchList,DbatchLabels = self.createBatches(trainingData,trainingLabels, 1,unique_labels)
 		trainingLabels=torch.tensor(trainingLabels)
 		if type(validationData)!=type(None):
-			validationData,validationLabels1=self.createBatches(validationData,validationLabels,1,unique_labels)
+			validationData1,validationLabels1=self.createBatches(validationData,validationLabels,1,unique_labels)
+			validationLabels=torch.tensor(validationLabels)
 		for i in range(epochs):
 			print("Epoch ", i)
+			t = time.time()
 			for j in range(len(batchList)):
-				# print(batchList[j])
-				# print(batchList)
 				activations = self.forward(batchList[j],True)
-				# print("forward done")
 				gradOutput=[torch.zeros(len(batchList[j][0]),activations.size()[1],dtype=dtype,device=device) for _ in range(len(batchList[j]))]        # times max_len of sequence of the batch
-				# gradOutput[:] =torch.zeros(len(batchList[j][0]),activations.size()[1]) # batchsize,output channels
-				# print('max_len=',len(batchList[j]))
-				# print('batchsize=',len(batchList[j][0]))
-				# print('batchsize=',activations.size())
-
-
 				gradOutput[-1] = criterion.backward(activations, batchLabels[j])
-				# print(len(gradOutput),len(gradOutput[0]))
 				self.clearGradParam()
-				# print('backward start')
-
 				self.backward(batchList[j], gradOutput)
-				# print('backward done')
 				self.updateParam(learningRate/((i+1)**0.7),alpha/((i+1)**0.7),regularizer)			
 			
 			predictions=[]
@@ -126,16 +113,18 @@ class Model:
 				crit_list.append(criterion.forward(self.forward(DbatchList[j]), DbatchLabels[j]).item())
 
 			predictions=torch.tensor(predictions)
+			t = time.time() - t
 			
 			print("Training Loss",sum(crit_list)/len(crit_list))
 			print("Training Accuracy: ", (torch.sum(predictions == trainingLabels).item()*100.0/trainingLabels.size()[0]))
-			if i%5==0 and i>0:
+			print("time elapsed",t)
+			if i%5==0 and i>=0:
 				if type(validationData)!=type(None):
 					predictions=[]
 					crit_list=[]
 					for j in range(len(validationData)):
-						predictions.append(self.classify(validationData[j])[0])
-						crit_list.append(criterion.forward(self.forward(validationData[j]), validationLabels[j]).item())
+						predictions.append(self.classify(validationData1[j])[0])
+						crit_list.append(criterion.forward(self.forward(validationData1[j]), validationLabels1[j]).item())
 					predictions=torch.tensor(predictions)
 					print("validation Loss",sum(crit_list)/len(crit_list))
 					print("Validation Accuracy: ", (torch.sum(predictions == validationLabels).item()*100.0/validationLabels.size()[0]))
@@ -148,101 +137,38 @@ class Model:
 		value, indices = torch.max(guesses,dim=1)
 		return indices
 
-	def saveModel(self, filepath0, filePath1, filePath2):
+	def saveModel(self,pathconfig,filepath):
 		lW = []
 		lB = []
 		f= open(filepath0,"w+")
 		f.write(str(len(self.Layers))+"\n")
 		for layer in self.Layers:
-			if layer.layerName == 'linear':
-				f.write(layer.layerName+" "+str(layer.in_neurons)+" "+str(layer.out_neurons)+"\n")
-				lW.append(layer.W)
-				lB.append(layer.B)
-			if layer.layerName == 'relu':
-				f.write("relu"+"\n")
-			if layer.layerName == 'Dropout':
-				f.write("Dropout "+str(layer.drop_rate)+"\n")
-			if layer.layerName == 'LeakyRelu':
-				f.write("LeakyRelu "+str(layer.leak)+"\n")
-			if layer.layerName == 'BatchNorm':
-				f.write("BatchNorm"+"\n")
-		f.write(filePath1+"\n")
-		f.write(filePath2)
-		f.close()
-		torch.save(lW,filePath1)
-		torch.save(lB,filePath2)
+			if layer.layerName == 'RNN' :
+				f.write(layer.layerName+" "+str(layer.input_dim)+" "+str(layer.hidden_dim)+" "+str(layer.output_dim)+" "+str(layer.mx)+"\n")
+				lW.append(layer.weights_hh)
+				lW.append(layer.weights_hx)
+				lW.append(layer.weights_hy)
+				lW.append(layer.bias_h)
+				lW.append(layer.bias_y)
+		torch.save(lW,filePath)
 
-	def loadModel(self,path_config):
-
+	def loadModel(self,path_config,filepath):
 		with open(path_config) as f:
 			content = f.readlines()
-			# you may also want to remove whitespace characters like \n at the end of each line
 			content = [x.strip() for x in content]
-		# print (content)
+
 		no_layers=int(content[0])
-		# print (no_layers)
-		layer_w_path=content[-2]
-		layer_bias_path=content[-1]
-		# weights=[]
-		# bias =[]
-		print(layer_bias_path)
-
-		try:
-			bias = torch.load(layer_bias_path,map_location= {'cuda:0':'cpu'})
-			weights = torch.load(layer_w_path,map_location= {'cuda:0':'cpu'})
-		except:
-			print("exept1")
-			try:
-
-				bias=torchfile.load(layer_bias_path)
-				weights=torchfile.load(layer_w_path)
-			except:
-				print("exept2")
-				pass
-			pass
-
-		indices=[]
-		j = 0
-		for i in range(1,len(content)-2):
+		l = torch.load(filepath)
+		for i in range(1,len(content)):
 			words=content[i].split()
-			# print(words)
-			if(words[0]=='linear'):
-				in_nodes=int(words[1])
-				out_nodes=int(words[2])
-				# print("creating linear layer with " + str(in_nodes) +" "+str(out_nodes))
-				self.addLayer(Linear.Linear(in_nodes,out_nodes))
-				# print(self.Layers[-1].B.size())
-				if type(self.Layers[-1].W)==type(weights[j]):
-					self.Layers[-1].W = (weights[j])#.clone().detach().requires_grad_(True)
-					self.Layers[-1].W = torch.tensor(self.Layers[-1].W,dtype=dtype,device=device)
-					self.Layers[-1].B = (bias[j]).reshape(self.Layers[-1].B.size())
-					self.Layers[-1].B = torch.tensor(self.Layers[-1].B,dtype=dtype,device=device)
-				else:
-					self.Layers[-1].W = torch.from_numpy(weights[j])#.clone().detach().requires_grad_(True)
-					self.Layers[-1].B = torch.from_numpy(bias[j]).reshape(self.Layers[-1].B.size())#.clone().detach()
-				j+=1
-				# print(type(self.Layers[-1].B))#,self.Layers[-1].B.size())
-				indices.append(i-1)
-			elif(words[0]=='relu'):
-				# print("creating relu layer")
-				self.addLayer(ReLU.ReLU())
-			elif(words[0]=='Dropout'):
-				self.addLayer(Dropout.Dropout())
-				self.Layers[-1].drop_rate = float(words[1])
-			elif(words[0]=='LeakyRelu'):
-				self.addLayer(LeakyRelu.LeakyRelu())
-				self.Layers[-1].leak = float(words[1])
-			elif(words[0]=='BatchNorm'):
-				self.addLayer(BatchNorm.BatchNorm())
+			if words[0]=='RNN':
+				layer = (Linear.Linear(int(words[1]),int(words[2]),int(words[3],float(words[4])))
+				layer.weights_hh = lW[i*5+0]
+				layer.weights_hx = lW[i*5+1]
+				layer.weights_hy = lW[i*5+2]
+				layer.bias_h = lW[i*5+3]
+				layer.bias_y = lW[i*5+4]
+				self.addLayer(layer)
 
-			
-	def save_Grads(self,path_w,path_b):
-		lb=[]
-		lw=[]
-		for layer in self.Layers:
-			if (layer.layerName=='linear'):
-				# print(layer.gradB)
-				lb.append(layer.gradB.reshape(layer.out_neurons))
-				lw.append(layer.gradW)
-		torch.save(lw,path_w)
-		torch.save(lb,path_b)
+		
+		

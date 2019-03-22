@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 import math
-import ReLU
 import Tanh
 
 dtype = torch.double
@@ -98,21 +97,6 @@ class RNN:
 		return M
 
 	def updateParam(self, learningRate, alpha=0, regularizer=0):
-		# print('update')
-
-
-		# self.grad_Whh[self.grad_Whh>self.max] = self.max
-		# self.grad_Whx[self.grad_Whx>self.max] = self.max
-		# self.grad_Why[self.grad_Why>self.max] = self.max
-		# self.grad_bias_h[self.grad_bias_h>self.max] = self.max
-		# self.grad_bias_y[self.grad_bias_y>self.max] = self.max
-
-		# self.grad_Whh[self.grad_Whh<-self.max] = -self.max
-		# self.grad_Whx[self.grad_Whx<-self.max] = -self.max
-		# self.grad_Why[self.grad_Why<-self.max] = -self.max
-		# self.grad_bias_h[self.grad_bias_h<-self.max] = -self.max
-		# self.grad_bias_y[self.grad_bias_y<-self.max] = -self.max
-
 
 		grad_Whh=self.clip(self.grad_Whh)
 		grad_Whx=self.clip(self.grad_Whx)
@@ -126,12 +110,6 @@ class RNN:
 		self.bias_h -= (self.grad_bias_h*learningRate+2*regularizer*self.bias_h)
 		self.bias_y -= (self.grad_bias_y*learningRate+2*regularizer*self.bias_y)
 
-		# print(self.weights_hh)
-
-		# self.W += (self.momentumW -2*regularizer*self.W)
-		# self.B += (self.momentumB -2*regularizer*self.B)
-		# self.momentumW = alpha*self.momentumW - learningRate*self.gradW
-		# self.momentumB = alpha*self.momentumB - learningRate*self.gradB
 
 
 

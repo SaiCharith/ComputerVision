@@ -2,17 +2,12 @@ import sys
 import os
 sys.path.insert(0, './src')
 
-import Linear
-import ReLU
 import Model
 # import BatchNorm
 
 import argparse
 import torch
-import torchfile
 import random
-import Dropout
-import LeakyRelu
 import RNN
 import numpy as np
 
@@ -38,7 +33,7 @@ def loadData(dataPath,labelsPath):
 	flattened = [val for sublist in Data for val in sublist]
 	unique_labels=list(np.unique(flattened))
 
-	TRAINING_SIZE = int(0.27*SIZE)
+	TRAINING_SIZE = int(0.7*SIZE)
 	VALIDATION_SIZE = int(0.3*SIZE)
 
 	indices = list(range(SIZE))
@@ -64,29 +59,19 @@ if __name__=='__main__':
 
 
 
-	batchSize = 1
+	batchSize = 3
 	epochs = 50
 	lr = 1.0e-1
 	reg = 0
-	# al = 0.7
+	al = 0.7
 	# leak = 0.01
 	# dropout_rate = 0.75
 	
 	neuralNetwork = Model.Model()
-	# neuralNetwork.addLayer(Linear.Linear(108*108,1024))
-	# neuralNetwork.addLayer(Dropout.Dropout(dropout_rate))
-	# neuralNetwork.addLayer(LeakyRelu.LeakyRelu(leak))
-	# neuralNetwork.addLayer(Linear.Linear(1024, 512))
-	# neuralNetwork.addLayer(Dropout.Dropout(dropout_rate))
-	# neuralNetwork.addLayer(LeakyRelu.LeakyRelu(leak))
-	# neuralNetwork.addLayer(Linear.Linear(512, 512))
-	# neuralNetwork.addLayer(Dropout.Dropout(dropout_rate))
-	# neuralNetwork.addLayer(LeakyRelu.LeakyRelu(leak))
-	# neuralNetwork.addLayer(Linear.Linear(512,6))
 	neuralNetwork.addLayer(RNN.RNN(len(unique_labels),256,2))
 	# neuralNetwork.addLayer(RNN.RNN(64,128,16))
 	# neuralNetwork.addLayer(RNN.RNN(16,64,2))
-	neuralNetwork.trainModel(lr, batchSize, epochs, trainingData,unique_labels, trainingLabels,reg)
+	neuralNetwork.trainModel(lr, batchSize, epochs, trainingData,unique_labels, trainingLabels,al,reg,validationData, validationLabels)
 
 
 	# directory = "./"+args.modelName+"/"
