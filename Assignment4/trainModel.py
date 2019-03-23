@@ -50,34 +50,42 @@ def loadData(dataPath,labelsPath):
 
 if __name__=='__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-modelName', help='Give Model Name',dest ="modelName",default='model')
+	parser.add_argument('-modelName', help='Give Model Name',dest ="modelName",default='bestModel')
 	parser.add_argument('-data', help='Give input.bin path',dest ="dataPath",default='./data/train_data.txt')
 	parser.add_argument('-target', help='give gradOutput.bin path',dest ="labelsPath",default='./data/train_labels.txt')
 
 	args = parser.parse_args()
+	random.seed(0)
 	trainingData, trainingLabels, validationData, validationLabels, unique_labels = loadData(args.dataPath,args.labelsPath)
 
-
+	
 
 	batchSize = 3
 	epochs = 50
 	lr = 1.0e-1
-	reg = 0
+	reg = 1.0e-4
 	al = 0.7
 	# leak = 0.01
 	# dropout_rate = 0.75
 	
 	neuralNetwork = Model.Model()
-	neuralNetwork.addLayer(RNN.RNN(len(unique_labels),256,2))
-	# neuralNetwork.addLayer(RNN.RNN(64,128,16))
+	# neuralNetwork.loadModel('bestModel/bestModalConfig.txt','bestModel/ModalWeights.bin')
+	neuralNetwork.addLayer(RNN.RNN(len(unique_labels),16,2))
+	# neuralNetwork.addLayer(RNN.RNN(16,16,2))
 	# neuralNetwork.addLayer(RNN.RNN(16,64,2))
 	neuralNetwork.trainModel(lr, batchSize, epochs, trainingData,unique_labels, trainingLabels,al,reg,validationData, validationLabels)
 
 
-	# directory = "./"+args.modelName+"/"
-	# if not os.path.exists(directory):
-	# 	os.makedirs(directory)
+	directory = "./"+args.modelName+"/"
+	if not os.path.exists(directory):
+		os.makedirs(directory)
 
-	# torch.save(trainingMean,directory+"trainingMean.bin")
-	# neuralNetwork.saveModel(directory+"bestModalConfig.txt",directory+"ModalWeights.bin",directory+"ModelBais.bin")
+	neuralNetwork.saveModel(directory+"bestModalConfig.txt",directory+"ModalWeights.bin")
 
+
+
+	# batchSize = 3
+	# epochs = 50
+	# lr = 1.0e-1
+	# reg = 0
+	# al = 0.7

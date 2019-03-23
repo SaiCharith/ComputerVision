@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import time
 import Criterion
-import torchfile
+import RNN
 
 
 dtype = torch.double
@@ -16,6 +16,7 @@ class Model:
 	def __init__(self):
 		self.Layers = []
 		self.isTrain = True
+		self.unique_labels = None
 
 	def forward(self, input,isTrain=False):
 		# print("Forwarding: ")
@@ -88,7 +89,7 @@ class Model:
 
 	def trainModel(self, learningRate, batchSize, epochs, trainingData,unique_labels, trainingLabels, alpha=0, regularizer=0,validationData=None,validationLabels=None):
 		criterion = Criterion.Criterion()
-		
+		self.unique_labels = unique_labels
 		batchList,batchLabels = self.createBatches(trainingData,trainingLabels, batchSize,unique_labels)
 		DbatchList,DbatchLabels = self.createBatches(trainingData,trainingLabels, 1,unique_labels)
 		trainingLabels=torch.tensor(trainingLabels)
@@ -105,20 +106,22 @@ class Model:
 				self.clearGradParam()
 				self.backward(batchList[j], gradOutput)
 				self.updateParam(learningRate/((i+1)**0.7),alpha/((i+1)**0.7),regularizer)			
-			
-			predictions=[]
-			crit_list=[]
-			for j in range(len(DbatchList)):
-				predictions.append(self.classify(DbatchList[j])[0])
-				crit_list.append(criterion.forward(self.forward(DbatchList[j]), DbatchLabels[j]).item())
-
-			predictions=torch.tensor(predictions)
 			t = time.time() - t
-			
-			print("Training Loss",sum(crit_list)/len(crit_list))
-			print("Training Accuracy: ", (torch.sum(predictions == trainingLabels).item()*100.0/trainingLabels.size()[0]))
 			print("time elapsed",t)
-			if i%5==0 and i>=0:
+			if (i+1)%5==0 :
+				predictions=[]
+				crit_list=[]
+				for j in range(len(DbatchList)):
+					predictions.append(self.classify(DbatchList[j])[0])
+					crit_list.append(criterion.forward(self.forward(DbatchList[j]), DbatchLabels[j]).item())
+
+				predictions=torch.tensor(predictions)
+				
+				
+				print("Training Loss",sum(crit_list)/len(crit_list))
+				print("Training Accuracy: ", (torch.sum(predictions == trainingLabels).item()*100.0/trainingLabels.size()[0]))
+				
+			
 				if type(validationData)!=type(None):
 					predictions=[]
 					crit_list=[]
@@ -137,19 +140,28 @@ class Model:
 		value, indices = torch.max(guesses,dim=1)
 		return indices
 
-	def saveModel(self,pathconfig,filepath):
+	def gettestPredictions(self,testData):
+		l = [None]*len(testData)
+		testData1,l=self.createBatches(validationData,l,1,self.unique_labels)
+		predictions=[]
+		for j in range(len(testData)):
+			predictions.append(self.classify(testData1[j])[0])
+		predictions=torch.tensor(predictions)
+		return predictions
+
+	def saveModel(self,pathconfig,filePath):
 		lW = []
-		lB = []
-		f= open(filepath0,"w+")
+		f= open(pathconfig,"w+")
 		f.write(str(len(self.Layers))+"\n")
 		for layer in self.Layers:
 			if layer.layerName == 'RNN' :
-				f.write(layer.layerName+" "+str(layer.input_dim)+" "+str(layer.hidden_dim)+" "+str(layer.output_dim)+" "+str(layer.mx)+"\n")
+				f.write(layer.layerName+" "+str(layer.input_dim)+" "+str(layer.hidden_dim)+" "+str(layer.output_dim)+" "+str(layer.max)+"\n")
 				lW.append(layer.weights_hh)
 				lW.append(layer.weights_hx)
 				lW.append(layer.weights_hy)
 				lW.append(layer.bias_h)
 				lW.append(layer.bias_y)
+		lW.append(self.unique_labels)		
 		torch.save(lW,filePath)
 
 	def loadModel(self,path_config,filepath):
@@ -158,17 +170,19 @@ class Model:
 			content = [x.strip() for x in content]
 
 		no_layers=int(content[0])
-		l = torch.load(filepath)
-		for i in range(1,len(content)):
-			words=content[i].split()
+		lW = torch.load(filepath)
+		# print(len(content))
+		for i in range(0,len(content)-1):
+			words=content[i+1].split()
 			if words[0]=='RNN':
-				layer = (Linear.Linear(int(words[1]),int(words[2]),int(words[3],float(words[4])))
+				layer = (RNN.RNN(int(words[1]),int(words[2]),int(words[3]),float(words[4])))
 				layer.weights_hh = lW[i*5+0]
 				layer.weights_hx = lW[i*5+1]
 				layer.weights_hy = lW[i*5+2]
 				layer.bias_h = lW[i*5+3]
 				layer.bias_y = lW[i*5+4]
 				self.addLayer(layer)
+		self.unique_labels = lW[-1]
 
 		
 		
