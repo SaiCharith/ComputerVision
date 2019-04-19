@@ -23,16 +23,14 @@ plot(salientFeaturePoints);
 pause(1);
 close;
 
-% REST
+% 1c)
 NUM_OF_FRAMES = 127;
-FIRST_FRAME = 1;
-templateFrame = double(imread(strcat("../input/", num2str(FIRST_FRAME), ".jpg")));
+templateFrame = im2double(imread(strcat("../input/", num2str(1), ".jpg")));
 [Ix, Iy] = imgradientxy(templateFrame);
 
-allLocations = zeros(NUM_OF_FRAMES*NUM_OF_POINTS, 2);
-allLocations((FIRST_FRAME-1)*NUM_OF_POINTS+1:FIRST_FRAME*NUM_OF_POINTS, :) = salientFeaturePoints.Location;
-for t=FIRST_FRAME+1:NUM_OF_FRAMES
-    frame = double(imread(strcat("../input/", num2str(t), ".jpg")));
+allLocations = zeros(NUM_OF_FRAMES
+for t=2:NUM_OF_FRAMES
+    frame = im2double(imread(strcat("../input/", num2str(t), ".jpg")));
     newLocation = zeros(NUM_OF_POINTS, 2);
     for k=1:NUM_OF_POINTS
         point = round(salientFeaturePoints.Location(k,:));
@@ -40,13 +38,18 @@ for t=FIRST_FRAME+1:NUM_OF_FRAMES
         motion = estimateMotion(templateFrame, frame, point, TEMPLATE_SIZE, Ix, Iy);
         newLocation(k, :) = motion*[point'; 1];
     end
-    allLocations((t-1)*NUM_OF_POINTS+1:t*NUM_OF_POINTS, :) = newLocation;
     figure;
-    imshow(uint8(frame)); hold on;
-    plot(round(allLocations(:, 1)), round(allLocations(:, 2)), '*');
-    [status, msg, msgID] = mkdir('ourOutput');
-    saveas(gcf, strcat("../ourOutput/", num2str(t), ".jpg"));
+    imshow(frame); hold on;
+    plot(round(newLocation(:, 1)), round(newLocation(:, 2)), '*');
+    savefig(strcat("../ourOutput/", num2str(t), ".fig"));
+    pause(4);
+    close;
 end
+
+% figure;
+% imshowpair(Ix,Iy,'montage')
+% title('Directional Gradients Gx and Gy, Using Sobel Method')
+
 %% Save all the trajectories frame by frame
 % variable trackedPoints assumes that you have an array of size 
 % No of frames * 2(x, y) * No Of Features
