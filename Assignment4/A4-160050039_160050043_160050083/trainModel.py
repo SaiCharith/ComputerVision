@@ -33,8 +33,7 @@ def loadData(dataPath,labelsPath):
 	flattened = [val for sublist in Data for val in sublist]
 	unique_labels=list(np.unique(flattened))
 
-	TRAINING_SIZE = int(0.7*SIZE)
-	VALIDATION_SIZE = int(0.3*SIZE)
+	TRAINING_SIZE = int(1.0*SIZE)
 
 	indices = list(range(SIZE))
 	random.shuffle(indices)
@@ -60,32 +59,24 @@ if __name__=='__main__':
 
 	
 
-	batchSize = 3
+	batchSize = 1
 	epochs = 50
-	lr = 1.0e-1
-	reg = 1.0e-4
-	al = 0.7
-	# leak = 0.01
-	# dropout_rate = 0.75
+	lr = 1.0e-2
+	reg = 1.0e-5
+	clip = 1.0e3
+	truncate = 100
+	hidden_size = 16
 	
 	neuralNetwork = Model.Model()
 	# neuralNetwork.loadModel('bestModel/bestModalConfig.txt','bestModel/ModalWeights.bin')
-	neuralNetwork.addLayer(RNN.RNN(len(unique_labels),16,2))
-	# neuralNetwork.addLayer(RNN.RNN(16,16,2))
+	neuralNetwork.addLayer(RNN.RNN(len(unique_labels),hidden_size,2,clip,truncate))
+	# neuralNetwork.addLayer(RNN.RNN(hidden_size,hidden_size,2,clip,truncate))
 	# neuralNetwork.addLayer(RNN.RNN(16,64,2))
-	neuralNetwork.trainModel(lr, batchSize, epochs, trainingData,unique_labels, trainingLabels,al,reg,validationData, validationLabels)
+	neuralNetwork.trainModel(lr, batchSize, epochs, trainingData,unique_labels, trainingLabels)#,0,reg,validationData, validationLabels)
 
 
 	directory = "./"+args.modelName+"/"
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 
-	neuralNetwork.saveModel(directory+"bestModalConfig.txt",directory+"ModalWeights.bin")
-
-
-
-	# batchSize = 3
-	# epochs = 50
-	# lr = 1.0e-1
-	# reg = 0
-	# al = 0.7
+	neuralNetwork.saveModel(directory+"bestModelConfig.txt",directory+"ModelWeights.bin")

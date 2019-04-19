@@ -47,20 +47,16 @@ if __name__=='__main__':
 
 
 	neuralNetwork = Model.Model()
-	neuralNetwork.loadModel(directory+"modelConfig.txt")
-
-
-	neuralNetwork = Model.Model()
-	neuralNetwork.loadModel(directory+'bestModalConfig.txt',directory+'ModalWeights.bin')
+	neuralNetwork.loadModel(directory+'bestModelConfig.txt',directory+'ModelWeights.bin')
 
 	predictions = neuralNetwork.gettestPredictions(testData)
 	torch.save(predictions,"testPrediction.bin")
 
 
-	f= open("testPredictionRandom.txt","w+")
-	f.write("id,label\n")
-	for i in range(predictions.size()[0]):
-	  f.write(str(i)+","+str(predictions[i].item())+"\n")
-	f.close()
+	# f= open("testPrediction.txt","w+")
+	# f.write("id,label\n")
+	# for i in range(predictions.size()[0]):
+	#   f.write(str(i)+","+str(predictions[i].item())+"\n")
+	# f.close()
 
 

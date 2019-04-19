@@ -65,7 +65,8 @@ class Model:
 				for j in range(len(batch)):
 					if len(batch[j])>i:
 						# print(unique_labels.index(batch[j][i]))
-						x[j,unique_labels.index(batch[j][i])]=1
+						if batch[j][i] in unique_labels:
+							x[j,unique_labels.index(batch[j][i])]=1
 
 				newlist.append(x)
 			return newlist
@@ -105,10 +106,11 @@ class Model:
 				gradOutput[-1] = criterion.backward(activations, batchLabels[j])
 				self.clearGradParam()
 				self.backward(batchList[j], gradOutput)
-				self.updateParam(learningRate/((i+1)**0.7),alpha/((i+1)**0.7),regularizer)			
+				self.updateParam(learningRate/((i+1)**0.0),alpha/((i+1)**0.7),regularizer)			
 			t = time.time() - t
 			print("time elapsed",t)
 			if (i+1)%5==0 :
+				# learningRate = learningRate/2.0
 				predictions=[]
 				crit_list=[]
 				for j in range(len(DbatchList)):
@@ -142,7 +144,7 @@ class Model:
 
 	def gettestPredictions(self,testData):
 		l = [None]*len(testData)
-		testData1,l=self.createBatches(validationData,l,1,self.unique_labels)
+		testData1,l=self.createBatches(testData,l,1,self.unique_labels)
 		predictions=[]
 		for j in range(len(testData)):
 			predictions.append(self.classify(testData1[j])[0])

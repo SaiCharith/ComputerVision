@@ -8,8 +8,9 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class RNN:
-	def __init__(self, input_dim, hidden_dim,output_dim,mx=1.0e4):
+	def __init__(self, input_dim, hidden_dim,output_dim,mx=1.0e4,truncate=100):
 		self.max = mx
+		self.truncate = truncate
 		self.input_dim = input_dim
 		self.hidden_dim = hidden_dim
 		self.output_dim = output_dim
@@ -67,7 +68,7 @@ class RNN:
 
 		grad_ht = torch.zeros((input[0].size()[0]),self.hidden_dim,dtype=dtype, device=device)			# batch X hidden
 		grad_x = [None for _ in range(len(input))]
-		for i in reversed(range(max(0,len(input)-100),len(input))):
+		for i in reversed(range(max(0,len(input)-self.truncate),len(input))):
 			grad_y = gradOutput[i]								# batch X output_dim
 			# print(grad_y.size(),self.grad_bias_y.size())
 			self.grad_bias_y = self.grad_bias_y.add(grad_y.sum(dim=0).reshape(self.output_dim,1))
