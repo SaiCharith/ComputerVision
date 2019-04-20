@@ -15,20 +15,22 @@ function p = estimateMotion(frame1, frame2, point, TEMPLATE_SIZE, Ix, Iy)
     for i=1:num_points
         dwdp(i,:,:) = [coords(1, i), coords(2, i), 1, 0, 0, 0; 0, 0, 0, coords(1, i), coords(2, i), 1];
     end
-
-    dI = [getPatch(Ix, coords); getPatch(Iy, coords)];
-    dIdwdp = zeros(num_points, 6);
-    H = zeros(6,6);
-    for i=1:num_points
-        dIdwdp(i, :) = reshape(dI(:,i), 1, 2)*squeeze(dwdp(i,:,:));
-        H = H + dIdwdp(i, :)'*dIdwdp(i, :);
-    end
+    
     template = getPatch(frame1, coords);
-    p = zeros(2, 3);  % Initial Guess
-    for i=1:20 %TODO for better convergenece
-       warp = getPatch(frame2, ceil(p*coords));
-       delP = ((template-warp)*dIdwdp/H)';
-       p = p + reshape(delP, 3, 2)';
+    p = [1 0 0; 0 1 0];  % Initial Guess
+    for t=1:30 %TODO for better convergenece
+        dI = [getPatch(Ix, round(p*coords)); getPatch(Iy, round(p*coords))];
+        dIdwdp = zeros(num_points, 6);
+        H = zeros(6,6);
+        for i=1:num_points
+            dIdwdp(i, :) = reshape(dI(:,i), 1, 2)*squeeze(dwdp(i,:,:));
+            H = H + dIdwdp(i, :)'*dIdwdp(i, :);
+        end
+        warp = getPatch(frame2, round(p*coords));
+        error = template-warp;
+        temp = error*dIdwdp;
+        delP = (temp*inv(H))';
+        p = p + reshape(delP, 3, 2)';
     end
 end
 
