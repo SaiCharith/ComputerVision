@@ -44,7 +44,7 @@ for i=1:T-1
     transformType='affine';
 %     transformType='projective';
     [tform,inlier2,inlier1] = estimateGeometricTransform(matchedPoints2,matchedPoints1,transformType);
-  matchedPoints1x = matchedPoints1.Location(:,1);
+    matchedPoints1x = matchedPoints1.Location(:,1);
     matchedPoints1y = matchedPoints1.Location(:,2);
     
 %     H = cvexEstStabilizationTform(prev_frame,curr_frame);
@@ -74,7 +74,7 @@ for i=1:T-1
     
    vector_of_transforms=[vector_of_transforms tformsRT];
 
-vector_of_transforms_x=[vector_of_transforms_x H(3,1)];
+  vector_of_transforms_x=[vector_of_transforms_x H(3,1)];
   
   vector_of_transforms_y=[vector_of_transforms_y H(3,2)];
   
@@ -94,6 +94,8 @@ noisy_sequence_scale=vector_of_transforms_scale;
 noisy_sequence_y=vector_of_transforms_y;
 
 noisy_sequence_theta=vector_of_transforms_theta;
+
+vector_of_transforms_avg = zeros(T-1,3,3);
 for i=1:T-1
        lower=max(1,i-halfwindow);
        upper=min(T-1,i+halfwindow);
@@ -130,6 +132,8 @@ for i=1:T-1
        
        
        vector_of_transforms_scale(i)=scale;
+       vector_of_transforms_avg(i,:,:) = [[scale*[cos(theta) -sin(theta); sin(theta) cos(theta)]; ...
+      [x y]], [0 0 1]'];
 end
 
 figure;
@@ -161,7 +165,7 @@ hold on;
 plot(vector_of_transforms_scale);
 legend('noisy','smoothed')
 title('for translation in scale');
-
+% pause(2);
 
 H=size(s(1).cdata,1);
 
@@ -169,12 +173,20 @@ W=size(s(1).cdata,2);
 
 outV=s;
 H_cum=eye(3);
+H_cum_rev = eye(3);
 x_cum=0;
 y_cum=0;
 theta_cum=0;
 for j=2:T
-    H_cum=vector_of_transforms(j-1).T*H_cum;
-    out = imwarp(s(j).cdata,vector_of_transforms(j-1),'OutputView',imref2d(size(s(j).cdata)));
+%     if mod(j,10)==0
+%         H_cum=eye(3);
+%     end
+    H_cum=squeeze(vector_of_transforms(j-1).T)*H_cum;
+    H_cum_rev = squeeze(vector_of_transforms_avg(j-1,:,:))*H_cum_rev;
+    H_cum_1 = H_cum/H_cum_rev;
+    H_cum_1(:,3) = [0 0 1];
+%     H_cum_1(3,1:2) = 0;
+    out = imwarp(s(j).cdata,affine2d(H_cum_1),'OutputView',imref2d(size(s(j-1).cdata)));
 %     out=imwarp(outV(j-1).cdata,vector_of_transforms(j-1),'OutputView',imref2d(size(s(j-1).cdata)));
 %     size(out)
     outV(j).cdata=out;
@@ -185,17 +197,14 @@ displayvideo(outV,0.005);
 
 
 
-
-
-
-
-
 N=T-1;
 
 
 
 
 %% Write Video
+[status, msg, msgID] = mkdir('../output');
+PathName = '../output/';
 vfile=strcat(PathName,'combined_',FileName);
 ff = VideoWriter(vfile);
 ff.FrameRate = 30;
@@ -204,6 +213,7 @@ open(ff)
 for i=1:N+1
     f1 = s(i).cdata;
     f2 = outV(i).cdata;
+    f2 = imresize(f2,[size(f1,1),size(f1,2)]);
     vframe=cat(1,f1, f2);
     writeVideo(ff, vframe);
 end
