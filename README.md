@@ -16,4 +16,4 @@ Implementation of an RNN which identifies malware using sequence of system calls
 
 
 ## Assignment 5
-Regression on House Price Prediction Dataset
+Motion tracking using KLT, Video stabilization using motion estimation.
