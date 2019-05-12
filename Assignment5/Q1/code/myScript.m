@@ -44,7 +44,9 @@ for t=2:NUM_OF_FRAMES
     end
     
     frame = double(imread(strcat("../input/", num2str(t), ".jpg")));
-    [Ix, Iy] = imgradientxy(frame); % Calculate gradients
+    [Ix, Iy] = imgradientxy(imgaussfilt(frame,2)); % Calculate gradients
+%     Ix = imgaussfilt(Ix,1);
+%     Iy = imgaussfilt(Iy,1);
 
     for k=1:NUM_OF_POINTS   % For each feature point
         point = salientFeaturePoints.Location(k,:);

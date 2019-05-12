@@ -131,8 +131,8 @@ class Model:
 		print(layer_bias_path)
 
 		try:
-			bias = torch.load(layer_bias_path,map_location= {'cuda:0':'cpu'})
-			weights = torch.load(layer_w_path,map_location= {'cuda:0':'cpu'})
+			bias = torch.load(layer_bias_path,map_location= {'cuda:0':device.type})
+			weights = torch.load(layer_w_path,map_location= {'cuda:0':device.type})
 		except:
 			print("exept1")
 			try:
